@@ -1,0 +1,20 @@
+{
+	"name": "@fahhh/deploy-core",
+	"private": true,
+	"type": "module",
+	"version": "0.0.0",
+	"types": "dist/index.d.ts",
+	"exports": "./src/index.ts",
+	"scripts": {
+		"dev": "tsup --watch",
+		"build": "tsup && tsc --emitDeclarationOnly",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"clean": "rm -rf .turbo dist node_modules"
+	},
+	"devDependencies": {
+		"@fahhh/typescript-config": "workspace:*",
+		"@types/node": "^22.15.3",
+		"tsup": "^8.5.1"
+	}
+}

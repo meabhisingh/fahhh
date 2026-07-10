@@ -1,0 +1,6 @@
+{
+  "extends": "@fahhh/typescript-config/bundler.json",
+  "include": [
+    "src"
+  ]
+}
