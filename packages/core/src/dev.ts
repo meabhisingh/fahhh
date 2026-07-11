@@ -17,31 +17,51 @@ export async function dev(options: DevOptions = {}) {
 	const routes = await loadApiRoutes(config.apiDir);
 	const middleware = await loadApiMiddleware(config.apiDir);
 
-	const apiServer = createDevServer({
+	const apiServer = await createDevServer({
 		routes,
 		middleware,
 		port: config.apiPort,
 	});
 
-	const viteServer = await createViteServer(
-		mergeConfig(config.vite, {
-			root: config.root,
-			plugins: [
-				fahhh({
-					root: config.root,
-					apiDir: config.apiDir,
-					outDir: config.outDir,
-					apiPort: config.apiPort,
-				}),
-			],
-			server: {
-				host: options.host,
-				port: options.port,
-			},
-		}),
-	);
+	let viteServer: Awaited<ReturnType<typeof createViteServer>>;
+	try {
+		viteServer = await createViteServer(
+			mergeConfig(config.vite, {
+				root: config.root,
+				plugins: [
+					fahhh({
+						root: config.root,
+						apiDir: config.apiDir,
+						outDir: config.outDir,
+						apiPort: config.apiPort,
+						onApiChange: async () => {
+							const [nextRoutes, nextMiddleware] = await Promise.all([
+								loadApiRoutes(config.apiDir),
+								loadApiMiddleware(config.apiDir),
+							]);
+							apiServer.update(nextRoutes, nextMiddleware);
+						},
+					}),
+				],
+				server: {
+					host: options.host,
+					port: options.port,
+				},
+			}),
+		);
+	} catch (error) {
+		apiServer.close();
+		throw error;
+	}
 
-	await viteServer.listen();
+	try {
+		await viteServer.listen();
+	} catch (error) {
+		apiServer.close();
+		await viteServer.close();
+		throw error;
+	}
+	viteServer.watcher.once("close", () => apiServer.close());
 	viteServer.printUrls();
 
 	return {

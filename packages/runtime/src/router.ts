@@ -4,6 +4,8 @@ export interface CompiledRoute {
 	path: string;
 }
 
+export class InvalidRouteParameterError extends Error {}
+
 /** Turns "/posts/:id" into a matchable regex, capturing param names in order. */
 export function compileRoute(path: string): CompiledRoute {
 	const paramNames: string[] = [];
@@ -42,7 +44,13 @@ export function matchRoute(
 			throw new Error(`[fahhh] Missing route param: ${name}`);
 		}
 
-		params[name] = decodeURIComponent(value);
+		try {
+			params[name] = decodeURIComponent(value);
+		} catch {
+			throw new InvalidRouteParameterError(
+				`[fahhh] Invalid encoded route parameter: ${name}`,
+			);
+		}
 	});
 	return params;
 }

@@ -15,6 +15,7 @@ export interface FahhhVitePluginOptions {
 	apiDir?: string;
 	outDir?: string;
 	apiPort?: number;
+	onApiChange?: () => void | Promise<void>;
 }
 
 export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
@@ -22,18 +23,32 @@ export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
 	let apiDir = "";
 	let outDir = "";
 	let manifest: ApiManifest = { routes: [] };
+	let refreshQueue = Promise.resolve();
 	const apiPort = options.apiPort ?? 8787;
 
 	async function refresh(server?: ViteDevServer): Promise<void> {
+		const previousShape = manifestShape(manifest);
 		manifest = await scanApiRoutes({ apiDir });
 		await writeManifest(outDir, manifest);
 		await writeVirtualApiTypes(outDir, manifest);
 
-		if (server) {
+		if (server && previousShape !== manifestShape(manifest)) {
 			const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_API_ID);
 			if (mod) server.moduleGraph.invalidateModule(mod);
 			server.ws.send({ type: "full-reload" });
 		}
+
+		await options.onApiChange?.();
+	}
+
+	function scheduleRefresh(server: ViteDevServer): void {
+		refreshQueue = refreshQueue
+			.then(() => refresh(server))
+			.catch((error: unknown) => {
+				server.config.logger.error(
+					error instanceof Error ? error.message : String(error),
+				);
+			});
 	}
 
 	return {
@@ -54,7 +69,7 @@ export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
 
 		configResolved(config) {
 			root = path.resolve(options.root ?? config.root);
-			apiDir = path.resolve(root, options.apiDir ?? "api");
+			apiDir = path.resolve(root, options.apiDir ?? "src/api");
 			outDir = path.resolve(root, options.outDir ?? ".fahhh");
 		},
 
@@ -74,7 +89,7 @@ export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
 			] as const) {
 				server.watcher.on(event, (filePath) => {
 					if (isApiFile(apiDir, filePath)) {
-						void refresh(server);
+						scheduleRefresh(server);
 					}
 				});
 			}
@@ -102,6 +117,12 @@ function isApiFile(apiDir: string, filePath: string): boolean {
 	return resolved === apiDir || resolved.startsWith(`${apiDir}${path.sep}`);
 }
 
+function manifestShape(manifest: ApiManifest): string {
+	return JSON.stringify(
+		manifest.routes.map(({ routePath, methods }) => ({ routePath, methods })),
+	);
+}
+
 function generateVirtualApiModule(manifest: ApiManifest): string {
 	const routes = manifest.routes
 		.map((route) => {
@@ -119,11 +140,11 @@ function generateVirtualApiModule(manifest: ApiManifest): string {
 	return `
 function createClient(routePath, method) {
   return async function callApi(input) {
-    const options = normalizeInput(input);
+    const options = input || {};
     const url = applyParams(routePath, options.params);
     const headers = new Headers(options.headers);
 
-    const init = { method, headers };
+    const init = { method, headers, signal: options.signal };
 
     if (options.body !== undefined) {
       if (!headers.has("Content-Type")) {
@@ -133,37 +154,21 @@ function createClient(routePath, method) {
     }
 
     const response = await fetch(url, init);
-    const contentType = response.headers.get("Content-Type") || "";
+    const dataType = response.headers.get("X-Fahhh-Data");
 
-    if (contentType.includes("application/json")) {
+    if (dataType === "json") {
       return response.json();
     }
+
+    if (dataType === "empty") return undefined;
 
     return response;
   };
 }
 
-function normalizeInput(input) {
-  if (
-    input &&
-    typeof input === "object" &&
-    ("body" in input || "params" in input || "headers" in input)
-  ) {
-    return input;
-  }
-
-  if (input === undefined) {
-    return {};
-  }
-
-  return { body: input };
-}
-
 function applyParams(routePath, params) {
-  if (!params) return routePath;
-
   return routePath.replace(/:([A-Za-z0-9_]+)/g, (_, name) => {
-    const value = params[name];
+    const value = params && params[name];
 
     if (value === undefined) {
       throw new Error("[fahhh] Missing route param: " + name);

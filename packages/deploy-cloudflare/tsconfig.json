@@ -1,6 +1,9 @@
 {
-  "extends": "@fahhh/typescript-config/bundler.json",
-  "include": [
-    "src"
-  ]
+	"extends": "@fahhh/typescript-config/bundler.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": "src"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "dist"]
 }
