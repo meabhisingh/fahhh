@@ -1,5 +1,7 @@
 import path from "node:path";
 import {
+	bundleServer,
+	generateServerEntry,
 	scanApiRoutes,
 	writeManifest,
 	writeVirtualApiTypes,
@@ -15,6 +17,7 @@ export interface BuildOptions {
 
 export async function build(options: BuildOptions = {}): Promise<void> {
 	const config = await loadConfig(options.cwd, options.config);
+	assertSafeDistDir(config.root, config.distDir);
 
 	const manifest = await scanApiRoutes({ apiDir: config.apiDir });
 	await writeManifest(config.outDir, manifest);
@@ -29,6 +32,7 @@ export async function build(options: BuildOptions = {}): Promise<void> {
 					apiDir: config.apiDir,
 					outDir: config.outDir,
 					apiPort: config.apiPort,
+					apiBaseUrl: config.apiBaseUrl,
 				}),
 			],
 			build: {
@@ -37,4 +41,24 @@ export async function build(options: BuildOptions = {}): Promise<void> {
 			},
 		}),
 	);
+
+	const serverOutDir = path.join(config.root, "dist-server");
+	assertSafeDistDir(config.root, serverOutDir);
+
+	const serverOutFile = path.join(serverOutDir, "api.js");
+	const serverEntry = generateServerEntry(manifest, serverOutDir);
+
+	await bundleServer(serverEntry, serverOutFile);
+}
+
+function assertSafeDistDir(root: string, distDir: string): void {
+	const relative = path.relative(distDir, root);
+	if (
+		relative === "" ||
+		(!relative.startsWith("..") && !path.isAbsolute(relative))
+	) {
+		throw new Error(
+			`[fahhh] Refusing to empty unsafe dist directory: ${distDir}`,
+		);
+	}
 }

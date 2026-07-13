@@ -3,7 +3,10 @@
 	"description": "The official Fahhh framework package",
 	"license": "MIT",
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.1.0",
+	"engines": {
+		"node": ">=18"
+	},
 	"types": "./dist/index.d.ts",
 	"main": "./dist/index.js",
 	"bin": {
@@ -27,6 +30,7 @@
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup && tsc --emitDeclarationOnly",
+		"check-types": "tsc --noEmit",
 		"prepublishOnly": "pnpm build",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
@@ -37,6 +41,7 @@
 	},
 	"dependencies": {
 		"@fahhh/runtime": "workspace:*",
+		"esbuild": "^0.27.7",
 		"jiti": "^2.4.2"
 	},
 	"peerDependencies": {
@@ -45,8 +50,8 @@
 	"devDependencies": {
 		"@fahhh/compiler": "workspace:*",
 		"@fahhh/deploy-core": "workspace:*",
-		"@fahhh/vite-plugin": "workspace:*",
 		"@fahhh/typescript-config": "workspace:*",
+		"@fahhh/vite-plugin": "workspace:*",
 		"@types/node": "^22.15.3",
 		"tsup": "^8.5.1"
 	}

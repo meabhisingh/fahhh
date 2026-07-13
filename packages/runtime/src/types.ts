@@ -1,4 +1,11 @@
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type HttpMethod =
+	| "GET"
+	| "POST"
+	| "PUT"
+	| "PATCH"
+	| "DELETE"
+	| "HEAD"
+	| "OPTIONS";
 
 /**
  * Wraps the real Fetch API Request so the same handler code runs

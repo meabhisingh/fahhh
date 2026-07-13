@@ -7,7 +7,9 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
+    "clean": "turbo run clean",
     "check-types": "turbo run check-types",
+    "test": "pnpm build && node --test tests/*.test.mjs",
     "create-package": "node scripts/create-package.js"
   },
   "devDependencies": {

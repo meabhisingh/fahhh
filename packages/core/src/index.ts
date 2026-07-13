@@ -8,8 +8,10 @@ export {
 	redirect,
 	text,
 } from "@fahhh/runtime";
+
 export * from "./apiLoader";
 export * from "./build";
 export * from "./config";
 export * from "./deploy";
 export * from "./dev";
+export * from "./start";

@@ -9,7 +9,14 @@ export function toRoutePath(apiDir: string, filePath: string): string {
 
 	const routeParts = parts.map((part) => {
 		if (part.startsWith("[") && part.endsWith("]")) {
-			return `:${part.slice(1, -1)}`;
+			const param = part.slice(1, -1);
+			if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(param)) {
+				throw new Error(`[fahhh] Invalid route parameter folder: ${part}`);
+			}
+			return `:${param}`;
+		}
+		if (part.includes("[") || part.includes("]")) {
+			throw new Error(`[fahhh] Invalid route folder: ${part}`);
 		}
 		return part;
 	});

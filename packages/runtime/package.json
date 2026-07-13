@@ -3,8 +3,14 @@
 	"description": "This is runtime of Fahhh",
 	"license": "MIT",
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=18"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -12,12 +18,14 @@
 		},
 		"./worker": {
 			"types": "./dist/worker.d.ts",
-			"import": "./dist/worker.js"
+			"import": "./dist/worker.js",
+			"default": "./dist/worker.js"
 		}
 	},
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup && tsc --emitDeclarationOnly",
+		"check-types": "tsc --noEmit",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"clean": "rm -rf .turbo dist node_modules"

@@ -48,5 +48,14 @@ export function methodNotAllowed(allowedMethods: string[] = []): Response {
  * `export async function GET(): Promise<User[]>` just `return users`.
  */
 export function toResponse(result: unknown): Response {
-	return result instanceof Response ? result : json(result);
+	if (result instanceof Response) return result;
+	if (result === undefined) {
+		return new Response(null, {
+			status: 204,
+			headers: { [DATA_RESPONSE_HEADER]: "empty" },
+		});
+	}
+
+	return json(result, { headers: { [DATA_RESPONSE_HEADER]: "json" } });
 }
+export const DATA_RESPONSE_HEADER = "X-Fahhh-Data";
