@@ -1,5 +1,7 @@
 import path from "node:path";
 import {
+	bundleServer,
+	generateServerEntry,
 	scanApiRoutes,
 	writeManifest,
 	writeVirtualApiTypes,
@@ -30,6 +32,7 @@ export async function build(options: BuildOptions = {}): Promise<void> {
 					apiDir: config.apiDir,
 					outDir: config.outDir,
 					apiPort: config.apiPort,
+					apiBaseUrl: config.apiBaseUrl,
 				}),
 			],
 			build: {
@@ -38,6 +41,14 @@ export async function build(options: BuildOptions = {}): Promise<void> {
 			},
 		}),
 	);
+
+	const serverOutDir = path.join(config.root, "dist-server");
+	assertSafeDistDir(config.root, serverOutDir);
+
+	const serverOutFile = path.join(serverOutDir, "api.js");
+	const serverEntry = generateServerEntry(manifest, serverOutDir);
+
+	await bundleServer(serverEntry, serverOutFile);
 }
 
 function assertSafeDistDir(root: string, distDir: string): void {

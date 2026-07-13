@@ -19,23 +19,21 @@ export default function App() {
 	};
 
 	return (
-		<main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 overflow-hidden bg-gray-950 px-6 text-white">
-			{/* Ambient glow background */}
+		<main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 overflow-hidden bg-gray-950 px-6 text-white selection:bg-green-700 selection:text-white">
 			<div className="pointer-events-none absolute inset-0">
 				<div className="absolute left-1/2 top-1/4 h-96 w-96 -translate-x-1/2 rounded-full bg-green-500/20 blur-[120px]" />
 				<div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-emerald-500/10 blur-[100px]" />
 			</div>
 
-			{/* Content */}
 			<div className="relative z-10 flex flex-col items-center gap-8">
-				{/* Badge */}
-				<span className="rounded-full border border-green-500/30 bg-green-500/10 px-4 py-1.5 text-xs font-medium tracking-wide text-green-400">
-					⚡ Powered by fahhh
-				</span>
+				<img
+					src="/logo.svg"
+					alt="FAHHH"
+					className="size-40 drop-shadow-green-600 drop-shadow-2xl "
+				/>
 
-				{/* Heading */}
 				<div className="text-center">
-					<h1 className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+					<h1 className="bg-linear-to-b from-white to-gray-400 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
 						FAHHH STARTER APP
 					</h1>
 					<p className="mt-3 text-sm text-gray-400">
@@ -43,7 +41,6 @@ export default function App() {
 					</p>
 				</div>
 
-				{/* Users card */}
 				<div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
 					<div className="rounded-xl bg-gray-900/60 px-5 py-4">
 						<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">
@@ -65,7 +62,6 @@ export default function App() {
 					</div>
 				</div>
 
-				{/* Actions */}
 				<div className="flex items-center gap-4">
 					<FahhhButton onClick={playFahhh}>FAHHH</FahhhButton>
 					<FahhhButton
@@ -77,11 +73,10 @@ export default function App() {
 				</div>
 			</div>
 
-			{/* Footer */}
 			<footer className="absolute bottom-6 text-xs text-gray-600">
 				Built with fahhh · Edit{" "}
 				<code className="rounded bg-white/5 px-1.5 py-0.5 text-gray-500">
-					src/App.tsx
+					src/web/App.tsx
 				</code>{" "}
 				to get started
 			</footer>
@@ -116,7 +111,7 @@ const FahhhButton = ({
 			type="button"
 			onClick={onClick}
 			className={clsx(
-				"relative  cursor-pointer px-6 py-3 rounded-xl font-semibold transition-all duration-100 ease-in-out active:translate-y-[6px] active:shadow-none",
+				"relative  cursor-pointer px-6 py-3 rounded-xl font-semibold transition-all duration-100 ease-in-out active:translate-y-1.5 active:shadow-none",
 				variants[variant],
 				className,
 			)}

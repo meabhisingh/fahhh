@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ApiManifest } from "./types";
+import type { ApiManifest } from "@fahhh/deploy-core";
 
 function toParamsType(routePath: string): string {
 	const names = Array.from(

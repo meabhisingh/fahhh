@@ -9,5 +9,5 @@ export default defineConfig({
 	skipNodeModulesBundle: true,
 	splitting: false,
 	noExternal: ["@fahhh/compiler", "@fahhh/deploy-core", "@fahhh/vite-plugin"],
-	external: ["@fahhh/runtime", "vite", "jiti"],
+	external: ["@fahhh/runtime", "esbuild", "vite", "jiti"],
 });

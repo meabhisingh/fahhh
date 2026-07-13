@@ -2,19 +2,14 @@ import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
-import type { DeployContext, DeploymentProvider } from "@fahhh/deploy-core";
+import type {
+	ApiManifest,
+	DeployContext,
+	DeploymentProvider,
+	ManifestRoute,
+} from "@fahhh/deploy-core";
 import { copyDir, emptyDir, pathExists } from "@fahhh/deploy-core";
 import { build as esbuild } from "esbuild";
-
-interface ManifestRoute {
-	filePath: string;
-	routePath: string;
-	methods: string[];
-}
-
-interface ApiManifest {
-	routes: ManifestRoute[];
-}
 
 const require = createRequire(import.meta.url);
 const workerRuntimeFile = require.resolve("@fahhh/runtime/worker");
@@ -56,8 +51,13 @@ export function cloudflarePages(
 				await writeCloudflareFunction(stageFunctions, route);
 			}
 
-			const middlewareFile = path.join(context.apiDir, "_middleware.ts");
-			if (await pathExists(middlewareFile)) {
+			for (const middlewareFile of manifest.middlewareFiles ?? []) {
+				if (!isPathInside(context.apiDir, middlewareFile)) {
+					throw new Error(
+						`[fahhh] API middleware is outside apiDir: ${middlewareFile}`,
+					);
+				}
+
 				await writeCloudflareMiddleware(stageFunctions, middlewareFile);
 			}
 		},
@@ -65,7 +65,20 @@ export function cloudflarePages(
 		async finish(context) {
 			const { stageRoot } = getStagePaths(context, options);
 
-			const args = ["--no-install", "wrangler", "pages", "deploy", "dist"];
+			let wranglerBin: string;
+			try {
+				wranglerBin = await resolvePackageBin(
+					"wrangler",
+					"wrangler",
+					context.root,
+				);
+			} catch {
+				throw new Error(
+					"[fahhh] Missing Wrangler. Install it with: pnpm add -D wrangler",
+				);
+			}
+
+			const args = ["pages", "deploy", "dist"];
 
 			if (options.projectName) {
 				args.push("--project-name", options.projectName);
@@ -75,7 +88,7 @@ export function cloudflarePages(
 				args.push("--branch", options.branch);
 			}
 
-			await runCommand("npx", args, stageRoot);
+			await runCommand(process.execPath, [wranglerBin, ...args], stageRoot);
 		},
 	};
 }
@@ -129,10 +142,15 @@ async function readManifest(manifestFile: string): Promise<ApiManifest> {
 
 function isManifest(value: unknown): value is ApiManifest {
 	if (!value || typeof value !== "object" || !("routes" in value)) return false;
-	const routes = (value as { routes?: unknown }).routes;
+
+	const manifest = value as {
+		routes?: unknown;
+		middlewareFiles?: unknown;
+	};
+
 	return (
-		Array.isArray(routes) &&
-		routes.every(
+		Array.isArray(manifest.routes) &&
+		manifest.routes.every(
 			(route) =>
 				route !== null &&
 				typeof route === "object" &&
@@ -144,7 +162,9 @@ function isManifest(value: unknown): value is ApiManifest {
 						method,
 					),
 				),
-		)
+		) &&
+		Array.isArray(manifest.middlewareFiles) &&
+		manifest.middlewareFiles.every((file) => typeof file === "string")
 	);
 }
 
@@ -174,10 +194,9 @@ async function writeCloudflareFunction(
 	await fs.mkdir(path.dirname(functionFile), { recursive: true });
 
 	const routeImport = toImportSpecifier(functionFile, route.filePath);
-	const runtimeImport = toImportSpecifier(functionFile, workerRuntimeFile);
 	await bundleFunction(
 		functionFile,
-		generateFunctionSource(route, routeImport, runtimeImport),
+		generateFunctionSource(route, routeImport, "@fahhh/runtime/worker"),
 	);
 }
 
@@ -240,7 +259,7 @@ async function writeCloudflareMiddleware(
 	const functionFile = path.join(functionsDir, "api", "_middleware.js");
 	await fs.mkdir(path.dirname(functionFile), { recursive: true });
 	const middlewareImport = toImportSpecifier(functionFile, middlewareFile);
-	const runtimeImport = toImportSpecifier(functionFile, workerRuntimeFile);
+	const runtimeImport = "@fahhh/runtime/worker";
 	const source = `
 import { composeMiddleware, toApiRequest } from ${JSON.stringify(runtimeImport)};
 import * as middlewareModule from ${JSON.stringify(middlewareImport)};
@@ -301,6 +320,31 @@ async function bundleFunction(filePath: string, source: string): Promise<void> {
 	await fs.writeFile(filePath, output.contents);
 }
 
+async function resolvePackageBin(
+	packageName: string,
+	binName: string,
+	cwd: string,
+): Promise<string> {
+	const projectRequire = createRequire(path.join(cwd, "package.json"));
+	const packageJsonFile = projectRequire.resolve(`${packageName}/package.json`);
+	const packageJson = JSON.parse(
+		await fs.readFile(packageJsonFile, "utf8"),
+	) as {
+		bin?: string | Record<string, string>;
+	};
+
+	const bin =
+		typeof packageJson.bin === "string"
+			? packageJson.bin
+			: packageJson.bin?.[binName];
+
+	if (!bin) {
+		throw new Error(`[fahhh] Could not find ${binName} bin in ${packageName}`);
+	}
+
+	return path.resolve(path.dirname(packageJsonFile), bin);
+}
+
 function toImportSpecifier(fromFile: string, toFile: string): string {
 	const target = toFile.replace(/\.[cm]?[tj]sx?$/, "");
 	let relative = path
@@ -319,23 +363,23 @@ function runCommand(
 	args: string[],
 	cwd: string,
 ): Promise<void> {
-	const executable = process.platform === "win32" ? `${command}.cmd` : command;
-
 	return new Promise((resolve, reject) => {
-		const child = spawn(executable, args, {
+		const child = spawn(command, args, {
 			cwd,
 			stdio: "inherit",
+			windowsHide: true,
 		});
 
 		child.on("error", reject);
 		child.on("exit", (code) => {
 			if (code === 0) resolve();
-			else
+			else {
 				reject(
 					new Error(
 						`[fahhh] ${command} ${args.join(" ")} failed with exit code ${code}`,
 					),
 				);
+			}
 		});
 	});
 }

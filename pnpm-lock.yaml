@@ -72,6 +72,9 @@ importers:
 
   packages/compiler:
     dependencies:
+      '@fahhh/deploy-core':
+        specifier: workspace:^
+        version: link:../deploy-core
       '@fahhh/runtime':
         specifier: workspace:^
         version: link:../runtime
@@ -82,18 +85,21 @@ importers:
       '@types/node':
         specifier: ^22.15.3
         version: 22.20.1
+      esbuild:
+        specifier: ^0.27.7
+        version: 0.27.7
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(typescript@6.0.3)
 
   packages/core:
     dependencies:
-      '@fahhh/deploy-core':
-        specifier: workspace:*
-        version: link:../deploy-core
       '@fahhh/runtime':
         specifier: workspace:*
         version: link:../runtime
+      esbuild:
+        specifier: ^0.27.7
+        version: 0.27.7
       jiti:
         specifier: ^2.4.2
         version: 2.7.0
@@ -104,6 +110,9 @@ importers:
       '@fahhh/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@fahhh/deploy-core':
+        specifier: workspace:*
+        version: link:../deploy-core
       '@fahhh/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -155,6 +164,10 @@ importers:
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(typescript@6.0.3)
 
   packages/deploy-core:
+    dependencies:
+      '@fahhh/runtime':
+        specifier: workspace:^
+        version: link:../runtime
     devDependencies:
       '@fahhh/typescript-config':
         specifier: workspace:*
@@ -185,6 +198,9 @@ importers:
       '@fahhh/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@fahhh/deploy-core':
+        specifier: workspace:*
+        version: link:../deploy-core
       vite:
         specifier: '>=5'
         version: 8.1.4(@types/node@22.20.1)(esbuild@0.27.7)(jiti@2.7.0)

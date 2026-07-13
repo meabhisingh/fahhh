@@ -6,6 +6,7 @@ import type { UserConfig } from "vite";
 
 export interface FahhhConfig {
 	root?: string;
+	apiBaseUrl?: string;
 	apiDir?: string;
 	webDir?: string;
 	outDir?: string;
@@ -19,6 +20,7 @@ export interface FahhhConfig {
 
 export interface ResolvedFahhhConfig {
 	root: string;
+	apiBaseUrl?: string;
 	apiDir: string;
 	webDir: string;
 	outDir: string;
@@ -76,6 +78,7 @@ function resolveConfig(
 
 	return {
 		root,
+		apiBaseUrl: config.apiBaseUrl,
 		apiDir: path.resolve(root, config.apiDir ?? "src/api"),
 		webDir: path.resolve(root, config.webDir ?? "src/web"),
 		outDir: path.resolve(root, config.outDir ?? ".fahhh"),

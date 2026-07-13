@@ -21,9 +21,11 @@
 	"devDependencies": {
 		"@fahhh/typescript-config": "workspace:*",
 		"@types/node": "^22.15.3",
+		"esbuild": "^0.27.7",
 		"tsup": "^8.5.1"
 	},
 	"dependencies": {
+		"@fahhh/deploy-core": "workspace:^",
 		"@fahhh/runtime": "workspace:^"
 	}
 }

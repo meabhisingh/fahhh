@@ -34,6 +34,7 @@ export async function dev(options: DevOptions = {}) {
 						apiDir: config.apiDir,
 						outDir: config.outDir,
 						apiPort: config.apiPort,
+						apiBaseUrl: config.apiBaseUrl,
 						onApiChange: async () => {
 							const [nextRoutes, nextMiddleware] = await Promise.all([
 								loadApiRoutes(config.apiDir),

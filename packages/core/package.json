@@ -40,8 +40,8 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@fahhh/deploy-core": "workspace:*",
 		"@fahhh/runtime": "workspace:*",
+		"esbuild": "^0.27.7",
 		"jiti": "^2.4.2"
 	},
 	"peerDependencies": {
@@ -49,8 +49,9 @@
 	},
 	"devDependencies": {
 		"@fahhh/compiler": "workspace:*",
-		"@fahhh/vite-plugin": "workspace:*",
+		"@fahhh/deploy-core": "workspace:*",
 		"@fahhh/typescript-config": "workspace:*",
+		"@fahhh/vite-plugin": "workspace:*",
 		"@types/node": "^22.15.3",
 		"tsup": "^8.5.1"
 	}

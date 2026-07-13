@@ -14,7 +14,8 @@
 		"clean": "rm -rf .turbo dist node_modules"
 	},
 	"dependencies": {
-		"@fahhh/compiler": "workspace:*"
+		"@fahhh/compiler": "workspace:*",
+		"@fahhh/deploy-core": "workspace:*"
 	},
 	"devDependencies": {
 		"@fahhh/typescript-config": "workspace:*",

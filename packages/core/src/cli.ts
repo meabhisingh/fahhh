@@ -3,8 +3,9 @@
 import { build } from "./build";
 import { deploy } from "./deploy";
 import { dev } from "./dev";
+import { start } from "./start";
 
-type Command = "dev" | "build" | "deploy" | "help";
+type Command = "dev" | "build" | "start" | "deploy" | "help";
 
 interface ParsedArgs {
 	command: Command;
@@ -19,6 +20,15 @@ async function main(): Promise<void> {
 
 	if (args.command === "help") {
 		printHelp();
+		return;
+	}
+
+	if (args.command === "start") {
+		await start({
+			cwd: args.cwd,
+			config: args.config,
+			port: args.port,
+		});
 		return;
 	}
 
@@ -103,6 +113,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 function normalizeCommand(command: string): Command {
 	if (
+		command === "start" ||
 		command === "dev" ||
 		command === "build" ||
 		command === "deploy" ||
@@ -134,6 +145,7 @@ fahhh
 Usage:
   fahhh dev [--port 5173] [--host] [--config fahhh.config.ts]
   fahhh build [--config fahhh.config.ts]
+  fahhh start [--port 3000] [--config fahhh.config.ts]
   fahhh deploy [--config fahhh.config.ts]
 
 Options:

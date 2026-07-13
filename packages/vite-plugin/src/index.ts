@@ -1,10 +1,10 @@
 import path from "node:path";
 import {
-	type ApiManifest,
 	scanApiRoutes,
 	writeManifest,
 	writeVirtualApiTypes,
 } from "@fahhh/compiler";
+import type { ApiManifest } from "@fahhh/deploy-core";
 import type { Plugin, ViteDevServer } from "vite";
 
 const VIRTUAL_API_ID = "virtual:api";
@@ -15,6 +15,7 @@ export interface FahhhVitePluginOptions {
 	apiDir?: string;
 	outDir?: string;
 	apiPort?: number;
+	apiBaseUrl?: string;
 	onApiChange?: () => void | Promise<void>;
 }
 
@@ -22,7 +23,7 @@ export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
 	let root = "";
 	let apiDir = "";
 	let outDir = "";
-	let manifest: ApiManifest = { routes: [] };
+	let manifest: ApiManifest = { routes: [], middlewareFiles: [] };
 	let refreshQueue = Promise.resolve();
 	const apiPort = options.apiPort ?? 8787;
 
@@ -102,7 +103,7 @@ export function fahhh(options: FahhhVitePluginOptions = {}): Plugin {
 
 		load(id) {
 			if (id === RESOLVED_VIRTUAL_API_ID) {
-				return generateVirtualApiModule(manifest);
+				return generateVirtualApiModule(manifest, options.apiBaseUrl);
 			}
 
 			return null;
@@ -123,7 +124,10 @@ function manifestShape(manifest: ApiManifest): string {
 	);
 }
 
-function generateVirtualApiModule(manifest: ApiManifest): string {
+function generateVirtualApiModule(
+	manifest: ApiManifest,
+	apiBaseUrl = "",
+): string {
 	const routes = manifest.routes
 		.map((route) => {
 			const methods = route.methods
@@ -138,10 +142,12 @@ function generateVirtualApiModule(manifest: ApiManifest): string {
 		.join(",\n");
 
 	return `
+  const API_BASE_URL = ${JSON.stringify(apiBaseUrl)};
+
 function createClient(routePath, method) {
   return async function callApi(input) {
     const options = input || {};
-    const url = applyParams(routePath, options.params);
+    const url = joinUrl(API_BASE_URL, applyParams(routePath, options.params));
     const headers = new Headers(options.headers);
 
     const init = { method, headers, signal: options.signal };
@@ -165,6 +171,12 @@ function createClient(routePath, method) {
     return response;
   };
 }
+
+function joinUrl(baseUrl, path) {
+  if (!baseUrl) return path;
+  return baseUrl.replace(/\\/+$/, "") + "/" + path.replace(/^\\/+/, "");
+}
+
 
 function applyParams(routePath, params) {
   return routePath.replace(/:([A-Za-z0-9_]+)/g, (_, name) => {

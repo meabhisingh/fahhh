@@ -19,12 +19,17 @@ export async function deploy(options: DeployOptions = {}): Promise<void> {
 
 	const provider = await resolveProvider(config.adapter);
 
+	const serverDir = join(config.root, "dist-server");
+	const serverEntry = join(serverDir, "api.js");
+
 	const context: DeployContext = {
 		root: config.root,
 		distDir: config.distDir,
 		apiDir: config.apiDir,
 		outDir: config.outDir,
 		manifestFile: join(config.outDir, "manifest.json"),
+		serverDir,
+		serverEntry,
 	};
 
 	await provider.build?.(context);

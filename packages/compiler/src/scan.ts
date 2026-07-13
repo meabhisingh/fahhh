@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { ApiManifest, ManifestRoute } from "@fahhh/deploy-core";
 import type { HttpMethod } from "@fahhh/runtime";
 import { toRoutePath } from "./paths";
-import type { ApiManifest, ScannedRoute } from "./types";
 
 const HTTP_METHODS: HttpMethod[] = [
 	"GET",
@@ -22,10 +22,15 @@ export async function scanApiRoutes({
 	apiDir,
 }: ScanApiOptions): Promise<ApiManifest> {
 	const exists = await pathExists(apiDir);
-	if (!exists) return { routes: [] };
+	if (!exists) return { routes: [], middlewareFiles: [] };
 
 	const files = await walk(apiDir);
-	const routes: ScannedRoute[] = [];
+	const middlewareFile = path.join(apiDir, "_middleware.ts");
+	const middlewareFiles = files.includes(middlewareFile)
+		? [middlewareFile]
+		: [];
+
+	const routes: ManifestRoute[] = [];
 
 	for (const filePath of files) {
 		if (!filePath.endsWith(`${path.sep}index.ts`)) continue;
@@ -49,10 +54,10 @@ export async function scanApiRoutes({
 
 	assertNoAmbiguousRoutes(routes);
 	routes.sort(compareRoutes);
-	return { routes };
+	return { routes, middlewareFiles };
 }
 
-function compareRoutes(a: ScannedRoute, b: ScannedRoute): number {
+function compareRoutes(a: ManifestRoute, b: ManifestRoute): number {
 	const aParts = a.routePath.split("/").filter(Boolean);
 	const bParts = b.routePath.split("/").filter(Boolean);
 	const length = Math.max(aParts.length, bParts.length);
@@ -72,8 +77,8 @@ function compareRoutes(a: ScannedRoute, b: ScannedRoute): number {
 	return 0;
 }
 
-function assertNoAmbiguousRoutes(routes: ScannedRoute[]): void {
-	const patterns = new Map<string, ScannedRoute>();
+function assertNoAmbiguousRoutes(routes: ManifestRoute[]): void {
+	const patterns = new Map<string, ManifestRoute>();
 
 	for (const route of routes) {
 		const pattern = route.routePath.replace(
