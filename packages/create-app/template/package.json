@@ -6,6 +6,7 @@
 		"node": ">=20.19"
 	},
 	"scripts": {
+		"start": "fahhh start",
 		"dev": "fahhh dev",
 		"build": "fahhh build",
 		"deploy": "fahhh deploy",

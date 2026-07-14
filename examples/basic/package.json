@@ -1,13 +1,16 @@
 {
-	"name": "example-basic",
+	"name": "__PROJECT_NAME__",
 	"private": true,
 	"type": "module",
+	"engines": {
+		"node": ">=20.19"
+	},
 	"scripts": {
+		"start": "fahhh start",
 		"dev": "fahhh dev",
 		"build": "fahhh build",
 		"deploy": "fahhh deploy",
-		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"check-types": "pnpm typecheck"
+		"typecheck": "tsc -p tsconfig.json --noEmit"
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.3.2",
