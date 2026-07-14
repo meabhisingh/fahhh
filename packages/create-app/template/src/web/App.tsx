@@ -13,7 +13,7 @@ export default function App() {
 
 	const playFahhh = () => {
 		const audio = new Audio(
-			"https://www.myinstants.com/media/sounds/fahhh_KcgAXfs.mp3",
+			"https://fahhh.pages.dev/fahhh.mp3",
 		);
 		audio.play();
 	};

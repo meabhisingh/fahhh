@@ -1,0 +1,34 @@
+---
+title: Writing an Adapter
+description: "How to implement a `DeploymentProvider` adapter for custom deployment targets."
+---
+
+# Writing an Adapter
+
+You can create a custom adapter by implementing the `DeploymentProvider` interface from `@fahhh/deploy-core`.
+
+## The `DeploymentProvider` Contract
+
+A deployment provider is an object with a `name` and four optional lifecycle methods that are executed during `fahhh deploy`:
+
+```typescript
+import type { DeployContext } from "@fahhh/deploy-core";
+
+export interface DeploymentProvider {
+  name: string;
+
+  // Optional hook to intercept or modify the build step
+  build?(context: DeployContext): Promise<void> | void;
+
+  // Responsible for moving/modifying static frontend assets
+  uploadStatic(context: DeployContext): Promise<void> | void;
+
+  // Responsible for bundling or uploading backend API routes
+  uploadFunctions(context: DeployContext): Promise<void> | void;
+
+  // Final execution step (e.g. running a CLI tool to upload)
+  finish(context: DeployContext): Promise<void> | void;
+}
+```
+
+The `DeployContext` provides you with all the paths you need to locate the output directories and the `ApiManifest`. You can use these methods to transform the built assets into the format required by your target platform (like AWS or Netlify).

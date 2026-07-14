@@ -1,0 +1,37 @@
+---
+title: Dependency Graph
+description: "Visualize package dependencies and understand why each relationship exists."
+---
+
+This graph illustrates how the internal `fahhh` packages depend on each other.
+
+<Mermaid
+  chart={
+    `
+    graph TD
+    fahhh["fahhh (core)"] --> runtime["@fahhh/runtime"]
+
+    vite-plugin["@fahhh/vite-plugin"] --> compiler["@fahhh/compiler"]
+    vite-plugin --> deploy-core["@fahhh/deploy-core"]
+
+    compiler --> deploy-core
+    compiler --> runtime
+
+    cloudflare["@fahhh/cloudflare"] --> deploy-core
+    cloudflare --> runtime
+
+    deploy-core --> runtime
+
+    create["create-fahhh"]
+    `
+
+}
+/>
+
+## Why this structure?
+
+1. **`@fahhh/runtime` is the foundational layer.** It has zero internal dependencies. It provides the core `ApiRequest` and `Response` helpers that everything else builds upon.
+2. **`@fahhh/deploy-core` sits above runtime.** It defines the shapes of the manifest and deployment interfaces. It relies on the runtime to understand HTTP methods.
+3. **`@fahhh/compiler` handles static analysis.** It needs the `deploy-core` interfaces to produce a valid `ApiManifest`, and `runtime` to construct the server entry file.
+4. **`@fahhh/vite-plugin` wraps the compiler.** It bridges the compiler's output into the Vite build lifecycle.
+5. **`create-fahhh` is completely isolated.** It only exists to scaffold new projects and does not share code with the framework itself.

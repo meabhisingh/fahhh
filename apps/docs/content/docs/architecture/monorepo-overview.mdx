@@ -1,0 +1,34 @@
+---
+title: Monorepo Overview
+description: An overview of the packages that make up the Fahhh monorepo and their responsibilities.
+---
+
+The `fahhh` framework is organized as a monorepo containing several distinct, purpose-built packages.
+
+## `fahhh` (core)
+
+The main entry point for the framework. It houses the CLI commands (`dev`, `build`, `start`, `deploy`) and orchestrates the other packages.
+
+## `@fahhh/runtime`
+
+The core runtime library containing the request/response wrappers, routing logic, and standard HTTP server implementations for both development and production. It has zero external dependencies.
+
+## `@fahhh/compiler`
+
+Responsible for static analysis and code generation. It scans your API directory, extracts route paths and methods, generates the `virtual-api.d.ts` types, and bundles the final server entry points using `esbuild`.
+
+## `@fahhh/vite-plugin`
+
+The Vite plugin that integrates `fahhh` into a Vite build pipeline. It intercepts `virtual:api` imports and actively watches your API directory to trigger re-compilations on the fly.
+
+## `create-fahhh` (create-app)
+
+The initialization CLI used when you run `pnpm create fahhh`. It provides the default template, `fahhh.config.ts`, and project structure.
+
+## `@fahhh/deploy-core`
+
+Defines the `DeploymentProvider` interface and provides shared filesystem utilities used by all deployment adapters.
+
+## `@fahhh/cloudflare`
+
+The official deployment adapter for Cloudflare Pages. It bundles API routes into individual Cloudflare Functions and handles Wrangler deployments.

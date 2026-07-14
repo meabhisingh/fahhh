@@ -1,0 +1,44 @@
+---
+title: ApiRequest
+description: "Shape of the request wrapper passed to handlers"
+---
+
+# `ApiRequest`
+
+The `ApiRequest` is the first argument passed to all of your HTTP method handlers in `src/api`.
+
+```typescript
+export interface ApiRequest<
+	TBody = undefined,
+	TParams = Record<string, string>,
+> {
+	raw: Request;
+	params: TParams;
+	headers: Headers;
+	json(): Promise<TBody>;
+}
+```
+
+## Properties
+
+### `raw`
+The underlying standard web `Request` object. Use this if you need access to the URL, search parameters, or raw body streams.
+
+```typescript
+export async function GET(req: ApiRequest) {
+	const url = new URL(req.raw.url);
+	const queryParam = url.searchParams.get("query");
+	// ...
+}
+```
+
+### `params`
+An object containing the typed dynamic path segments. 
+
+For example, in `src/api/users/[id]/index.ts`, `params.id` is available and strictly typed as a string.
+
+### `headers`
+A standard Web API `Headers` object, linked directly to the underlying `Request`.
+
+### `json()`
+A function that parses the request body as JSON. By typing your handler (e.g., `ApiRequest<{ name: string }>`), this method will return a typed `Promise<{ name: string }>`.

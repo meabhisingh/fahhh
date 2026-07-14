@@ -1,0 +1,208 @@
+---
+title: Roadmap
+description: "The current Fahhh roadmap across runtime, typegen, adapters, docs, and release work."
+---
+
+# Roadmap
+
+Fahhh is being built as a small full-stack framework on top of Vite, React, filesystem API routes, typed client calls, and deployment adapters.
+
+This roadmap tracks the work needed to move Fahhh from a working early framework into something people can install, deploy, and trust.
+
+## Status
+
+<Files>
+  <Folder name="done" defaultOpen>
+    <File name="filesystem-api-routes" />
+    <File name="typed-virtual-api-client" />
+    <File name="dev-server-with-route-updates" />
+    <File name="node-production-server" />
+    <File name="cloudflare-pages-adapter" />
+  </Folder>
+  <Folder name="active" defaultOpen>
+    <File name="docs" />
+    <File name="create-app-polish" />
+    <File name="integration-tests" />
+    <File name="release-packaging" />
+  </Folder>
+  <Folder name="next">
+    <File name="netlify-adapter" />
+    <File name="vercel-adapter" />
+    <File name="lambda-adapter" />
+  </Folder>
+</Files>
+
+## Now
+
+These are the priorities before the first serious public release.
+
+### Package Publishing
+
+- Publish `fahhh` as the main framework package and CLI.
+- Publish `@fahhh/runtime` for runtime and worker-safe imports.
+- Publish `@fahhh/deploy-core` for shared adapter types and utilities.
+- Publish `@fahhh/cloudflare` as the first deployment adapter.
+- Keep `@fahhh/compiler` and `@fahhh/vite-plugin` internal and bundled into `fahhh`.
+
+### CLI
+
+- Make `fahhh dev` output cleaner and framework-owned.
+- Keep `fahhh build` producing both `dist` and `dist-server/api.js`.
+- Keep `fahhh start` serving the production Node build.
+- Keep `fahhh deploy` adapter-driven.
+- Pass `--host` and `--port` consistently where commands support them.
+
+### Docs
+
+- Finish the core concept pages.
+- Add production Node deployment docs.
+- Improve Cloudflare Pages deployment docs.
+- Add adapter authoring docs.
+- Add contribution and release docs.
+
+## Runtime
+
+Runtime work is focused on keeping the request model close to platform APIs.
+
+<Tabs items={["done", "next"]}>
+  <Tab value="done">
+    - Standard `Request`, `Response`, and `Headers` based handlers.
+    - `ApiRequest` wrapper for typed bodies and route params.
+    - `json`, `text`, `redirect`, `notFound`, and `methodNotAllowed`.
+    - `405 Method Not Allowed` with `Allow` header.
+    - `HEAD` fallback to `GET`.
+    - Middleware composition with duplicate `next()` protection.
+    - Node request body limits.
+    - Worker-safe runtime export.
+  </Tab>
+  <Tab value="next">
+    - Better production server logging.
+    - More cookie coverage.
+    - More streaming tests.
+    - Cleaner error pages for production Node.
+    - Optional request helpers for query params.
+  </Tab>
+</Tabs>
+
+## Compiler
+
+Compiler work turns filesystem routes into manifests, generated types, and deployable server entries.
+
+<Tabs items={["done", "next"]}>
+  <Tab value="done">
+    - Scan `src/api/**/index.ts`.
+    - Convert `[id]` folders into `:id` route params.
+    - Validate dynamic route param names.
+    - Detect ambiguous dynamic routes.
+    - Generate `.fahhh/manifest.json`.
+    - Generate `.fahhh/virtual-api.d.ts`.
+    - Generate Node server entries.
+  </Tab>
+  <Tab value="next">
+    - Support more export patterns safely.
+    - Improve diagnostic messages with route file paths.
+    - Add integration tests for generated manifests.
+    - Add type tests for body, params, empty responses, and raw responses.
+  </Tab>
+</Tabs>
+
+## Type Safety
+
+Typed API calls are one of Fahhh's main reasons to exist.
+
+- Infer response type from handler return value.
+- Infer request body type from `req.json()`.
+- Infer dynamic params from the route path.
+- Require params for dynamic routes.
+- Allow optional `headers` and `signal`.
+- Keep generated types inspectable in `.fahhh`.
+
+Future type work:
+
+- Typed query helpers.
+- Better raw `Response` modeling.
+- Better error messages when a handler cannot be inferred.
+
+## Deployment
+
+Fahhh deployments should be adapter-driven. App code should stay the same across platforms whenever possible.
+
+### Node
+
+Node is the baseline production target.
+
+- `fahhh build` creates `dist` for static assets.
+- `fahhh build` creates `dist-server/api.js` for the production server.
+- `fahhh start` runs the generated Node server.
+
+### Cloudflare
+
+Cloudflare Pages is the first adapter.
+
+- Static assets are staged from `dist`.
+- API routes become Pages Functions.
+- Middleware becomes a Pages Functions middleware file.
+- Wrangler handles auth and upload.
+
+### Netlify
+
+Netlify is the next adapter target.
+
+- Static assets should deploy from `dist`.
+- API routes should become Netlify Functions.
+- Function `config.path` should map Fahhh routes to Netlify routes.
+- Fahhh should handle method dispatch so `405` stays consistent.
+
+### Vercel
+
+Vercel should come after Netlify.
+
+- Generate Vercel-compatible functions.
+- Preserve same-origin `/api` behavior.
+- Support `apiBaseUrl` for separate API origins.
+
+### AWS Lambda
+
+Lambda is useful but should come after Pages-style adapters.
+
+- Decide between Function URLs and API Gateway.
+- Document IAM and region setup clearly.
+- Decide how static assets are hosted.
+
+## Testing
+
+Testing needs to move from package-only checks to real framework behavior.
+
+- Add an integration test app.
+- Test `fahhh dev`.
+- Test `fahhh build`.
+- Test `fahhh start`.
+- Test route params, middleware, 404, 405, HEAD, and POST bodies.
+- Test generated `virtual:api` types.
+- Add adapter smoke tests where practical.
+
+## Release Readiness
+
+Fahhh is ready for a stronger public release when these are true:
+
+- `create-fahhh` creates a working app.
+- `fahhh dev` has clean output and reload behavior.
+- `fahhh build && fahhh start` works on a fresh app.
+- Cloudflare deploy works from a fresh app.
+- Docs cover install, routing, API handlers, typegen, config, build, start, deploy, and contribution.
+- CI runs typecheck, build, lint, and integration tests.
+- Package publishing has been dry-run checked with `pnpm pack --dry-run`.
+
+## SSR
+
+SSR is not supported yet.
+
+Fahhh currently ships as a client-rendered Vite app with typed API routes. Adding SSR will require a separate design for page routing, hydration, data loading, streaming, and deployment adapters.
+
+Planned future work:
+
+- Server render `src/web` pages on Node first.
+- Add hydration support for client boot.
+- Define a page routing model.
+- Design server data loading.
+- Evaluate adapter support after Node SSR works.

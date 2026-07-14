@@ -1,0 +1,33 @@
+---
+title: dev
+description: "An overview of what `fahhh dev` starts and how the development environment works."
+---
+
+The `dev` command is your primary tool during development.
+
+```bash
+fahhh dev [options]
+```
+
+## Options
+
+| Option            | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `--port <port>`   | Port for the development server (default: `5173`) |
+| `--host`          | Expose the development server to the network      |
+| `--config <file>` | Path to a custom `fahhh` config file              |
+
+## What it does
+
+When you run `fahhh dev`, the CLI starts two interconnected servers:
+
+1. **API Dev Server**: A lightweight Node.js server that dynamically loads your API routes and middleware.
+2. **Vite Dev Server**: A standard Vite dev server handling your React frontend, HMR, and CSS compilation.
+
+### The Watcher
+
+The Vite plugin actively watches your `src/api` directory. If you add, change, or remove a backend route file, it immediately:
+
+- Rescans the API directory.
+- Re-generates `.fahhh/virtual-api.d.ts` to update your frontend types.
+- Hot-swaps the routes in the running API Dev Server without requiring a full restart.

@@ -15,12 +15,21 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"complexity": {
+				"noImportantStyles": "off"
+			}
 		}
 	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true,
+			"allowWrongLineComments": true
 		}
 	},
 	"assist": {
@@ -33,7 +42,9 @@
 	},
 	"overrides": [
 		{
-			"includes": ["packages/create-app/template/public/favicon.svg"],
+			"includes": [
+				"packages/create-app/template/public/favicon.svg"
+			],
 			"linter": {
 				"rules": {
 					"a11y": {

@@ -2,7 +2,7 @@
 	"name": "create-fahhh",
 	"private": false,
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"engines": {
 		"node": ">=18"
 	},

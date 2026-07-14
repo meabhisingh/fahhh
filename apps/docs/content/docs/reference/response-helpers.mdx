@@ -1,0 +1,35 @@
+---
+title: Response Helpers
+description: "json, text, redirect, notFound, methodNotAllowed"
+---
+
+# Response Helpers
+
+`fahhh` provides several utilities in the `@fahhh/runtime` (and exported by `fahhh` core) to make returning native `Response` objects easier.
+
+```typescript
+import { json, text, redirect, notFound, methodNotAllowed } from "fahhh";
+```
+
+### `json(body, init?)`
+Returns a `Response` with `Content-Type: application/json`.
+- `body`: Any JSON-serializable object.
+- `init`: Optional `ResponseInit` (status code, headers).
+
+### `text(body, init?)`
+Returns a `Response` with `Content-Type: text/plain`.
+- `body`: A string.
+- `init`: Optional `ResponseInit`.
+
+### `redirect(url, status?)`
+Returns a `Response` that redirects the client.
+- `url`: The string URL to redirect to.
+- `status`: Optional HTTP status code (defaults to `302 Found`).
+
+### `notFound(message?)`
+Returns a `404 Not Found` `Response`.
+- `message`: Optional custom message (defaults to `"Not Found"`).
+
+### `methodNotAllowed(allowedMethods)`
+Returns a `405 Method Not Allowed` `Response`.
+- `allowedMethods`: An array of HTTP methods supported by the route (e.g., `["GET", "POST"]`). Automatically sets the `Allow` header.

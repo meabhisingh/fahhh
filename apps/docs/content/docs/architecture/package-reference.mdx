@@ -1,0 +1,40 @@
+---
+title: Package Reference
+description: A reference guide to the packages that make up the Fahhh monorepo and their responsibilities.
+---
+
+`fahhh` is split into several packages, each with a specific responsibility. Most users only ever interact directly with `fahhh` (the core package), but understanding the others is useful for contributors or those writing custom deployment adapters.
+
+## Core Packages
+
+- **`fahhh`**
+  - **Purpose**: The main framework package. It exposes `defineConfig`, the CLI, and re-exports necessary runtime utilities.
+  - **Dependencies**: `@fahhh/runtime`, `esbuild`, `jiti`, `vite`.
+
+- **`@fahhh/runtime`**
+  - **Purpose**: Core Request/Response types, the router, and the dev server implementation.
+  - **Dependencies**: None.
+
+- **`@fahhh/compiler`**
+  - **Purpose**: File-system scanning, route generation, and server entry bundling.
+  - **Dependencies**: `@fahhh/deploy-core`, `@fahhh/runtime`.
+
+- **`@fahhh/vite-plugin`**
+  - **Purpose**: Integrates the compiler into Vite, serving `virtual:api`.
+  - **Dependencies**: `@fahhh/compiler`, `@fahhh/deploy-core`, `vite`.
+
+## Deployment Packages
+
+- **`@fahhh/deploy-core`**
+  - **Purpose**: Shared types (`DeploymentProvider`, `ApiManifest`) and filesystem utils for adapters.
+  - **Dependencies**: `@fahhh/runtime`.
+
+- **`@fahhh/cloudflare`**
+  - **Purpose**: Cloudflare Pages deployment adapter.
+  - **Dependencies**: `@fahhh/deploy-core`, `@fahhh/runtime`, `esbuild`, `wrangler`.
+
+## Tooling Packages
+
+- **`create-fahhh`**
+  - **Purpose**: Scaffolding CLI for `pnpm create fahhh`.
+  - **Dependencies**: None.

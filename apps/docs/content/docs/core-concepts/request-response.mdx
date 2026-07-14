@@ -1,0 +1,65 @@
+---
+title: Request & Response
+description: "The `ApiRequest` shape, response helpers, and raw `Response` handling."
+---
+
+In `fahhh`, handlers are built around standard web `Request` and `Response` objects, with a light wrapper to improve ergonomics and type safety.
+
+## `ApiRequest`
+
+Every exported HTTP method handler (`GET`, `POST`, etc.) receives an `ApiRequest` as its first argument.
+
+```typescript
+export interface ApiRequest<
+  TBody = undefined,
+  TParams = Record<string, string>,
+> {
+  raw: Request;
+  params: TParams;
+  headers: Headers;
+  json(): Promise<TBody>;
+}
+```
+
+This wrapper ensures that:
+
+1. `req.json()` returns the correctly typed body.
+2. `req.params` contains the typed dynamic segments of your route.
+3. You still have access to the raw underlying `Request` if you need it.
+
+## Returning Data
+
+`fahhh` allows handlers to return raw, JSON-serializable data directly. You do not have to manually construct a `Response` object for basic endpoints.
+
+```typescript title="src/api/hello/index.ts"
+export async function GET() {
+  // fahhh automatically wraps this in a JSON Response!
+  return { message: "Hello World" };
+}
+```
+
+### Response Escape Hatch
+
+If you need full control over the status code, headers, or want to trigger redirects, you can return a standard `Response` object. `fahhh` provides several helpers for this:
+
+```typescript title="src/api/auth/index.ts"
+import { json, text, redirect, notFound, methodNotAllowed } from "fahhh";
+
+export async function POST(req) {
+  if (badCondition) {
+    return json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  if (needsLogin) {
+    return redirect("/login");
+  }
+
+  if (resourceDeleted) {
+    return notFound("User does not exist");
+  }
+
+  return text("Success");
+}
+```
+
+Whenever a native `Response` is returned, `fahhh` will pass it through untouched to the client.

@@ -1,0 +1,36 @@
+---
+title: File-Based Routing
+description: "How `src/api` folders map to routes, including dynamic segments and route resolution."
+---
+
+`fahhh` uses a file-system based router for the API. When you start the dev server or build the project, the compiler scans your `src/api` directory and automatically registers routes based on the file paths.
+
+## Route Resolution
+
+Only files named `index.ts` inside the `api` directory are considered route files. The folder structure maps directly to the URL path.
+
+For example:
+
+- `src/api/index.ts` maps to `/`
+- `src/api/users/index.ts` maps to `/users`
+- `src/api/users/settings/index.ts` maps to `/users/settings`
+
+## Dynamic Segments
+
+You can define dynamic route segments by wrapping a folder name in brackets, like `[id]`. During compilation, `fahhh` converts these to `:param` syntax.
+
+For example, `src/api/users/[id]/index.ts` handles paths like `/users/123`.
+
+The matched parameters are automatically passed to your handlers in the `req.params` object:
+
+```typescript title="src/api/users/[id]/index.ts"
+import type { ApiRequest } from "fahhh";
+
+export async function GET(req: ApiRequest<undefined, { id: string }>) {
+  return { userId: req.params.id };
+}
+```
+
+## Ambiguous Routes
+
+If you define multiple routes that conflict (e.g., both a static route and a dynamic route at the same level that would match the same path structure), the compiler will throw an error at build time to prevent unexpected behavior. Routes are sorted by specificity, prioritizing static segments over dynamic ones.

@@ -1,0 +1,62 @@
+---
+title: Project Structure
+description: "The default `fahhh` project layout, including API routes, frontend code, assets, and configuration."
+---
+
+When you create a new `fahhh` app, you will get a cleanly organized project structure separating your backend from your frontend.
+
+ 
+<Files>
+    <Folder name="public">
+  <File name="logo.svg" />
+  </Folder>
+  <Folder name="src" defaultOpen>
+    <Folder name="api">
+      <File name="_middleware.ts" />
+      <Folder name="posts">
+        <Folder name="[id]">
+          <File name="index.ts" />
+        </Folder>
+      </Folder>
+      <Folder name="users">
+        <File name="index.ts" />
+      </Folder>
+    </Folder>
+    <Folder name="web">
+      <File name="App.tsx" />
+      <File name="main.tsx" />
+      <Folder name="styles">
+        <File name="index.css" />
+      </Folder>
+    </Folder>
+    <File name="vite-env.d.ts" />
+  </Folder>
+  <File name="fahhh.config.ts" />
+  <File name="index.html" />
+  <File name="package.json" />
+  <File name="tsconfig.json" />
+  <File name="vite.config.ts" />
+  <File name=".gitignore" />
+</Files>
+
+## `src/api/`
+This directory holds your backend code. Any file exported from here becomes an API route accessible by the frontend. For example, `src/api/users/index.ts` becomes available at the `/api/users` route.
+
+## `src/web/`
+This directory contains your React application. Your entry points, React components, and client-side logic live here. You can import your backend endpoints directly from `virtual:api`.
+
+## `fahhh.config.ts`
+The configuration file for `fahhh`. Here you define the locations of your API and web directories, as well as the port for your API server.
+
+```typescript title="fahhh.config.ts"
+import { defineConfig } from "fahhh";
+
+export default defineConfig({
+	apiDir: "src/api",
+	webDir: "src/web",
+	apiPort: 8787,
+});
+```
+
+## `vite.config.ts`
+Your standard Vite configuration file. By default, it comes configured with the React plugin, React Compiler, and Tailwind CSS v4.

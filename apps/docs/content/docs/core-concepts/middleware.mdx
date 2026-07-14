@@ -1,0 +1,44 @@
+---
+title: Middleware
+description: "How `_middleware.ts` files work and how middleware composition is handled."
+---
+
+You can intercept and modify requests before they reach your route handlers using middleware.
+
+To define middleware, create a `_middleware.ts` file in your `src/api` directory. The compiler automatically detects this file and injects it into the request lifecycle.
+
+## Defining Middleware
+
+Middleware is a function that receives the `ApiRequest` and a `next` function. You must call `next()` to pass control to the subsequent middleware or the final route handler, and it must return a `Response`.
+
+```typescript title="src/api/_middleware.ts"
+import type { Middleware } from "fahhh";
+
+export const middleware: Middleware = async (req, next) => {
+  const start = Date.now();
+
+  // Pass control to the next handler
+  const response = await next();
+
+  const ms = Date.now() - start;
+  console.log(`${req.raw.method} ${new URL(req.raw.url).pathname} - ${ms}ms`);
+
+  return response;
+};
+```
+
+## Composition Behavior
+
+If you define multiple middlewares (by exporting an array from `_middleware.ts`), they are composed sequentially.
+
+When a request comes in:
+
+1. The first middleware runs.
+2. When it calls `next()`, the second middleware runs.
+3. This continues until the final route handler is reached.
+4. The `Response` bubbles back up the chain.
+
+<Callout title="Warning" type="warn">
+  Calling `next()` multiple times within the same middleware will throw an
+  error: `"fahhh next() called multiple times in middleware"
+</Callout>

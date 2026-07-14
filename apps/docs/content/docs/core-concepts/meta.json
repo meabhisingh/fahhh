@@ -1,0 +1,10 @@
+{
+	"title": "Core Concepts",
+	"pages": [
+		"file-based-routing",
+		"virtual-api",
+		"request-response",
+		"middleware",
+		"environment-variables"
+	]
+}

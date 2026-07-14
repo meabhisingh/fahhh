@@ -1,0 +1,25 @@
+---
+title: start
+description: "Run a built `fahhh` app in production with zero adapter required."
+---
+
+The `start` command runs your built `fahhh` app for production.
+
+```bash
+fahhh start [options]
+```
+
+## Options
+
+| Option            | Description                                      |
+| ----------------- | ------------------------------------------------ |
+| `--port <port>`   | Port for the production server (default: `3000`) |
+| `--config <file>` | Path to a custom `fahhh` config file             |
+
+## Self-Hosting
+
+You must run `fahhh build` before running `fahhh start`.
+
+When you run `start`, the CLI simply spawns a Node.js process to execute your `dist-server/api.js` file, which is hard-coded to serve your static assets from `dist/` alongside your API routes.
+
+Because `dist-server/api.js` is just a standard Node.js server, **zero adapter is required** for standard self-hosting (like running on a VPS, Heroku, or a Docker container). Adapters are only necessary if you are deploying to serverless/edge environments like Cloudflare Workers or AWS Lambda.

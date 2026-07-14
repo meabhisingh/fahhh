@@ -1,0 +1,62 @@
+---
+title: Virtual API
+description: "How `virtual:api` exposes typed API routes from the server to the client."
+---
+
+The defining feature of `fahhh` is its zero-runtime-cost, end-to-end type safety powered by `virtual:api`.
+
+By importing from `virtual:api` in your React frontend, you gain access to a fully typed client capable of calling your backend API endpoints without manual type sharing or code generation steps (like OpenAPI).
+
+## How it works
+
+When the Vite plugin starts, the `fahhh` compiler scans your `src/api` directory and dynamically generates a virtual TypeScript module (`.fahhh/virtual-api.d.ts`).
+
+This module looks like this under the hood:
+
+```typescript
+declare module "virtual:api" {
+  // Utility types to extract arguments and return values
+  type HandlerReturn<T> = /* ... */;
+  type HandlerBody<T> = /* ... */;
+  type ClientInput<TBody, TParams> = /* ... */;
+  type ClientFn<THandler, TParams> = /* ... */;
+
+  const api: {
+    "/api/users": {
+      GET: ClientFn<typeof import("./src/api/users/index").GET, {}>;
+      POST: ClientFn<typeof import("./src/api/users/index").POST, {}>;
+    };
+    "/api/users/[id]": {
+      GET: ClientFn<typeof import("./src/api/users/[id]/index").GET, { "id": string }>;
+    };
+  };
+
+  export default api;
+}
+```
+
+## Using the Client
+
+The virtual API object is structured around your route paths. You access a route by its path string, and then invoke its methods (`GET`, `POST`, etc.).
+
+```tsx title="src/web/App.tsx"
+import api from "virtual:api";
+import { useEffect, useState } from "react";
+
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Both the route "/api/users/[id]" and the "id" param are autocompleted!
+    api["/api/users/[id]"].GET({ params: { id: "123" } }).then(setUser);
+  }, []);
+
+  return <div>{user?.name}</div>;
+}
+```
+
+### Type Flow
+
+1. **Parameters (`TParams`)**: The compiler parses `[id]` and ensures `params.id` is required in the client call.
+2. **Request Body (`TBody`)**: If your API handler expects an `ApiRequest<{ name: string }>`, the client forces you to pass a `body` with `{ name: string }`.
+3. **Response (`TReturn`)**: The awaited result on the frontend matches precisely what your `GET` or `POST` handler returns.

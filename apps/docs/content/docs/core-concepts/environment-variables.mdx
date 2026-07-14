@@ -1,0 +1,37 @@
+---
+title: Environment Variables
+description: "How server and client environment variables are accessed in `fahhh`."
+---
+
+# Environment Variables
+
+Because `fahhh` builds your backend API and your frontend React application into two distinct environments, how you access environment variables depends on where the code runs.
+
+## Server (`src/api`)
+
+Your backend API runs natively in Node.js (or your chosen deployment environment like Cloudflare Workers). It does **not** go through Vite's transformations.
+
+To access environment variables in your API routes, use standard `process.env`:
+
+```typescript title="src/api/auth/index.ts"
+export async function POST() {
+  // Access secrets securely on the server
+  const secret = process.env.DATABASE_URL;
+  return { success: true };
+}
+```
+
+## Client (`src/web`)
+
+Your React frontend is bundled by Vite. It runs in the browser, meaning `process.env` is not available.
+
+To expose variables to the client, you must prefix them with `VITE_` and access them via `import.meta.env`:
+
+```tsx title="src/web/App.tsx"
+export default function App() {
+  // Only variables starting with VITE_ are exposed to the client
+  const apiKey = import.meta.env.VITE_PUBLIC_API_KEY;
+
+  return <div>{apiKey}</div>;
+}
+```

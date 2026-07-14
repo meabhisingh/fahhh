@@ -1,0 +1,56 @@
+---
+title: defineConfig()
+description: "FahhhConfig shape, default values"
+---
+
+The `defineConfig` function provides type completion for your `fahhh.config.ts` file.
+
+```typescript
+import { defineConfig } from "fahhh";
+
+export default defineConfig({
+	// Configuration options
+});
+```
+
+## Options
+
+### `root`
+- **Type**: `string`
+- **Default**: `.` (current working directory)
+- **Description**: The root of your project.
+
+### `apiDir`
+- **Type**: `string`
+- **Default**: `"src/api"`
+- **Description**: Where the compiler scans for backend routes.
+
+### `webDir`
+- **Type**: `string`
+- **Default**: `"src/web"`
+- **Description**: The location of your frontend code (used internally, currently largely delegates to Vite's root/index.html).
+
+### `outDir`
+- **Type**: `string`
+- **Default**: `".fahhh"`
+- **Description**: Where the compiler places generated types and manifests.
+
+### `distDir`
+- **Type**: `string`
+- **Default**: `"dist"`
+- **Description**: Where the production Vite build outputs your frontend assets.
+
+### `apiPort`
+- **Type**: `number`
+- **Default**: `8787`
+- **Description**: The port used by the internal API Dev Server.
+
+### `vite`
+- **Type**: `UserConfig` (from Vite)
+- **Default**: `{}`
+- **Description**: Raw Vite configuration object. This is merged with `fahhh`'s internal Vite config.
+
+### `adapter`
+- **Type**: `DeploymentProvider | (() => DeploymentProvider | Promise<DeploymentProvider>)`
+- **Default**: `undefined`
+- **Description**: The deployment adapter used during `fahhh deploy`.

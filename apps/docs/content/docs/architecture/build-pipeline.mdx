@@ -1,0 +1,95 @@
+---
+title: Build Pipeline
+description: "An overview of the build pipeline for client and server outputs."
+---
+
+The `fahhh build` command produces two separate artifacts: the frontend client bundle and the backend server bundle.
+
+The compiler operates in distinct phases.
+
+## 1. Client Build Pipeline
+
+The client build runs through a standard Vite build, augmented by the `@fahhh/vite-plugin`.
+
+<div className="overflow-x-auto ">
+<Mermaid
+chart={`graph LR
+    subgraph Source
+        A[API Routes]
+    end
+
+    subgraph Plugin["Vite Plugin"]
+        B[scanApiRoutes()]
+        C[Generate ApiManifest]
+        D[writeVirtualApiTypes()]
+    end
+
+    subgraph Generated
+        E["virtual-api.d.ts"]
+    end
+
+    subgraph Build
+        F[Vite React Compiler]
+        G[Bundle]
+        H((dist/))
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+
+`}
+/>
+</div>
+
+1. **Scan**: The compiler walks `src/api`, finding all exported HTTP methods and generating an `ApiManifest`.
+2. **Typegen**: Using the manifest, it writes `.fahhh/virtual-api.d.ts` to disk.
+3. **Vite Build**: The frontend is bundled by Vite, consuming the generated types.
+
+## 2. Server Build Pipeline
+
+Simultaneously, the backend is bundled into a standalone Node.js file.
+
+<div className="overflow-x-auto ">
+<Mermaid
+chart={`
+graph LR
+    subgraph Source
+        A[API Directory]
+    end
+
+    subgraph Plugin["Vite Plugin"]
+        B[scanApiRoutes()]
+        C[Generate ApiManifest]
+        D[generateServerEntry()]
+    end
+
+    subgraph Generated
+        E["__fahhh_server_entry.ts"]
+    end
+
+    subgraph Build
+        F[esbuild]
+        G[Bundle]
+        H((dist-server/api.js))
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+
+`}
+/>
+</div>
+
+1. **Scan**: The same `ApiManifest` from the client build is used.
+2. **Server Entry**: A temporary file is generated that imports all your route files, binds them to the `fahhh` router, and starts a Node.js HTTP server.
+3. **Bundle**: `esbuild` statically analyzes and bundles the temporary entry file along with all your API code into a single, dependency-free file at `dist-server/api.js`.

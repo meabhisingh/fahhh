@@ -1,0 +1,40 @@
+---
+title: Cloudflare Pages
+description: "How to configure Cloudflare Pages deployments and how `uploadFunctions()` works."
+---
+
+# Cloudflare Pages
+
+To deploy your `fahhh` app to Cloudflare Pages, use the official `@fahhh/deploy-cloudflare` adapter.
+
+## Configuration
+
+Install the adapter and configure it in your `fahhh.config.ts`:
+
+```typescript title="fahhh.config.ts"
+import { defineConfig } from "fahhh";
+import { cloudflarePages } from "@fahhh/deploy-cloudflare";
+
+export default defineConfig({
+  adapter: cloudflarePages({
+    projectName: "my-fahhh-app",
+  }),
+});
+```
+
+To deploy, simply run:
+
+```bash
+fahhh deploy
+```
+
+<Callout title="Note">
+  Ensure you have `wrangler` installed as a dev dependency (`pnpm add -D
+  wrangler`), as the adapter delegates the final upload to the Wrangler CLI.
+</Callout>
+
+## How it works
+
+When the Cloudflare adapter runs its `uploadFunctions()` step, it reads your API manifest and translates your route paths into Cloudflare Pages Functions syntax (e.g., `src/api/users/[id]/index.ts` becomes `cloudflare/functions/users/[id].js`).
+
+It then uses `esbuild` to individually bundle each route with an injected Cloudflare handler wrapper, mapping `fahhh`'s `ApiRequest` to the raw Cloudflare `PagesContext` automatically.

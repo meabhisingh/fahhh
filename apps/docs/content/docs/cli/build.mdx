@@ -1,0 +1,30 @@
+---
+title: build
+description: "What `fahhh build` produces: frontend assets, server bundles, and deployment metadata."
+---
+
+The `build` command compiles your `fahhh` app for production deployment.
+
+```bash
+fahhh build [options]
+```
+
+## Options
+
+| Option            | Description                          |
+| ----------------- | ------------------------------------ |
+| `--config <file>` | Path to a custom `fahhh` config file |
+
+## What it produces
+
+Unlike traditional Single Page Applications (SPAs) that just produce a `dist` folder, `fahhh` produces two distinct build outputs.
+
+### `dist/`
+
+Your frontend client bundle. `fahhh build` runs standard `vite build` under the hood. All your React code, CSS, and static assets from the `public/` directory are compiled, minified, and placed here.
+
+### `dist-server/`
+
+Your backend server bundle. `fahhh` uses `esbuild` to bundle all your API routes and middleware into a single file at `dist-server/api.js`. This is a standalone, dependency-free Node.js file ready to be executed on a server or deployed to a cloud provider.
+
+The build process also outputs `virtual-api.d.ts` and `manifest.json` into your `.fahhh` directory, which deployment adapters can use to understand your route structure.

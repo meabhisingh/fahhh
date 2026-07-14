@@ -1,0 +1,21 @@
+---
+title: Overview
+description: "How the `DeploymentProvider` interface enables pluggable deployment adapters."
+---
+
+By default, running `fahhh build` produces a standalone Node.js server (`dist-server/api.js`) that you can self-host anywhere. However, if you want to deploy to serverless or edge environments, you can use a **Deployment Adapter**.
+
+## Pluggable Architecture
+
+`fahhh` defines a pluggable `DeploymentProvider` interface that controls how the build artifacts are shaped and uploaded to third-party platforms.
+
+This interface allows the core framework to remain platform-agnostic while supporting diverse hosting targets like Cloudflare Pages, AWS Lambda, or Netlify.
+
+### Do I need an adapter?
+
+<Callout title="Yes or No" type="idea">
+  If you are deploying to a standard Node.js environment (a VPS, Docker
+  container, Render, Railway, etc.), you do not need a deployment adapter. You
+  only need an adapter if you are targeting specialized serverless or edge
+  runtimes.
+</Callout>

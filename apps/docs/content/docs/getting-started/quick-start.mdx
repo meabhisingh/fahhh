@@ -1,0 +1,66 @@
+---
+title: Quick Start
+description: "Create your first route and page, then connect them end to end."
+---
+
+In this guide, we'll walk through creating your first API route and displaying its data on your frontend.
+
+## 1. Create an API Route
+
+In `fahhh`, any file you place in `src/api` that exports an HTTP method (`GET`, `POST`, etc.) becomes an API endpoint.
+
+Let's create a new endpoint that returns a list of users. Create `src/api/users/index.ts`:
+
+```typescript title="src/api/users/index.ts"
+export async function GET() {
+	return [
+		{ id: "1", name: "Angena Ghatram" },
+		{ id: "2", name: "Naine Vaktram" },
+	];
+}
+```
+
+This creates a `GET` endpoint at `/api/users`.
+
+## 2. Fetch from the Frontend
+
+Now, let's fetch this data in our React application. `fahhh` gives you a fully typed client via the `virtual:api` import. 
+
+Open your `src/web/App.tsx` and import the API client:
+
+```tsx title="src/web/App.tsx"
+import api from "virtual:api";
+import { useEffect, useState } from "react";
+
+export default function App() {
+	const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
+
+	useEffect(() => {
+		// The route and response type are fully autocompleted and type-safe!
+		api["/api/users"].GET().then(setUsers);
+	}, []);
+
+	return (
+		<div>
+			<h1>Users</h1>
+			<ul>
+				{users.map((user) => (
+					<li key={user.id}>{user.name}</li>
+				))}
+			</ul>
+		</div>
+	);
+}
+```
+
+Because of `virtual:api`, the type of `user` in your React component perfectly matches the return type of your backend `GET` function.
+
+## 3. Start the Dev Server
+
+Run the development server to see your application in action:
+
+```bash
+pnpm dev
+```
+
+Your API and frontend will be built simultaneously, and `virtual:api` will instantly update whenever you modify your backend routes.

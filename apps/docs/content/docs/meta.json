@@ -1,0 +1,12 @@
+{
+	"title": "Getting Started",
+	"pages": [
+		"getting-started",
+		"architecture",
+		"core-concepts",
+		"cli",
+		"deployment",
+		"reference",
+		"community"
+	]
+}

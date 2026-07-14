@@ -1,0 +1,36 @@
+---
+title: Installation
+description: "How to create a new `fahhh` project and set up the required environment."
+---
+
+To create a new `fahhh` project, you can use the official `create-app` CLI.
+
+<Tabs persist groupId="packageManager" items={["npm", "yarn", "pnpm", "bun"]}>
+  <Tab value="npm">
+    ```bash
+    npx create-fahhh my-app
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn create-fahhh my-app
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm dlx create-fahhh my-app
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bunx dlx create-fahhh my-app
+    ```
+  </Tab>
+</Tabs>
+
+## Requirements
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js**: `fahhh` requires Node.js version **20.19** or higher.
+- A package manager of your choice (`pnpm` is highly recommended, but `npm`, `yarn` or `bun` work too).

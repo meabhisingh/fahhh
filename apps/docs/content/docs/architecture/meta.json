@@ -1,0 +1,9 @@
+{
+	"title": "Architecture",
+	"pages": [
+		"monorepo-overview",
+		"package-reference",
+		"dependency-graph",
+		"build-pipeline"
+	]
+}

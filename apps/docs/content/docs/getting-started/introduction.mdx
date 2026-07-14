@@ -1,0 +1,17 @@
+---
+title: Introduction
+description: "What `fahhh` is, why it exists, and how it differs from traditional full-stack frameworks."
+---
+
+**fahhh** is a full-stack React framework that provides a seamless developer experience by combining a Vite-powered frontend with a deeply integrated backend API.
+
+Unlike traditional setups or larger frameworks like Next.js, `fahhh` focuses on simplicity and speed by giving you end-to-end type safety out of the box using zero-runtime-cost virtual imports. There is no complex data-fetching abstraction—just write your API routes and import them directly into your React components.
+
+## Why it exists
+
+`fahhh` is built for developers who want:
+
+- **Simplicity**: No magic `getServerSideProps` or Server Actions. You write standard API endpoints, and you call them from React.
+- **End-to-End Type Safety**: Using `virtual:api`, the types of your backend responses flow seamlessly into your frontend components without requiring manual OpenAPI generation or shared type files.
+- **Vite & React 19**: Leverages modern tooling like Vite, React 19, React Compiler, and Tailwind CSS v4.
+- **Pluggable Deployments**: Ship anywhere by writing simple deployment adapters. The core is platform-agnostic.
