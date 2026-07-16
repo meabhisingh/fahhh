@@ -57,6 +57,13 @@ export async function scanApiRoutes({
 	return { routes, middlewareFiles };
 }
 
+function routePartRank(part: string): number {
+	if (!part.startsWith(":")) return 3;
+	if (part.endsWith("*?")) return 0;
+	if (part.endsWith("*")) return 1;
+	return 2;
+}
+
 function compareRoutes(a: ManifestRoute, b: ManifestRoute): number {
 	const aParts = a.routePath.split("/").filter(Boolean);
 	const bParts = b.routePath.split("/").filter(Boolean);
@@ -65,32 +72,46 @@ function compareRoutes(a: ManifestRoute, b: ManifestRoute): number {
 	for (let index = 0; index < length; index++) {
 		const aPart = aParts[index];
 		const bPart = bParts[index];
+
 		if (aPart === undefined) return -1;
 		if (bPart === undefined) return 1;
-		const aDynamic = aPart.startsWith(":");
-		const bDynamic = bPart.startsWith(":");
-		if (aDynamic !== bDynamic) return aDynamic ? 1 : -1;
-		const compared = aPart.localeCompare(bPart);
-		if (compared !== 0) return compared;
+
+		const aRank = routePartRank(aPart);
+		const bRank = routePartRank(bPart);
+
+		if (aRank !== bRank) {
+			return bRank - aRank;
+		}
+
+		if (!aPart.startsWith(":") && !bPart.startsWith(":")) {
+			const compared = aPart.localeCompare(bPart);
+			if (compared !== 0) return compared;
+		}
 	}
 
 	return 0;
+}
+
+function normalizeRoutePattern(routePath: string): string {
+	return routePath
+		.replace(/:[A-Za-z_][A-Za-z0-9_]*\*\?/g, ":optionalCatchAll")
+		.replace(/:[A-Za-z_][A-Za-z0-9_]*\*/g, ":catchAll")
+		.replace(/:[A-Za-z_][A-Za-z0-9_]*/g, ":param");
 }
 
 function assertNoAmbiguousRoutes(routes: ManifestRoute[]): void {
 	const patterns = new Map<string, ManifestRoute>();
 
 	for (const route of routes) {
-		const pattern = route.routePath.replace(
-			/:[A-Za-z_][A-Za-z0-9_]*/g,
-			":param",
-		);
+		const pattern = normalizeRoutePattern(route.routePath);
 		const existing = patterns.get(pattern);
+
 		if (existing) {
 			throw new Error(
 				`[fahhh] Ambiguous API routes: ${existing.filePath} and ${route.filePath}`,
 			);
 		}
+
 		patterns.set(pattern, route);
 	}
 }

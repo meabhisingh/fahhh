@@ -17,7 +17,7 @@ For example:
 
 ## Dynamic Segments
 
-You can define dynamic route segments by wrapping a folder name in brackets, like `[id]`. During compilation, `fahhh` converts these to `:param` syntax.
+You can define dynamic route segments by wrapping a folder name in brackets, like `[id]`. During compilation, `fahhh` converts these to parameter syntax.
 
 For example, `src/api/users/[id]/index.ts` handles paths like `/users/123`.
 
@@ -28,6 +28,32 @@ import type { ApiRequest } from "fahhh";
 
 export async function GET(req: ApiRequest<undefined, { id: string }>) {
   return { userId: req.params.id };
+}
+```
+
+### Catch-All Segments
+
+To match multiple segments, you can use a catch-all route by adding an ellipsis inside the brackets, like `[...slug]`. 
+This will match paths like `/blog/a`, `/blog/a/b`, and `/blog/a/b/c`. Catch-all parameters must be the last segment in the path.
+
+```typescript title="src/api/blog/[...slug]/index.ts"
+import type { ApiRequest } from "fahhh";
+
+export async function GET(req: ApiRequest<undefined, { slug: string[] }>) {
+  return { path: req.params.slug.join("/") };
+}
+```
+
+### Optional Catch-All Segments
+
+To make the catch-all segment optional, wrap it in double brackets, like `[[...slug]]`.
+Unlike a standard catch-all route, an optional catch-all route will also match the route without the parameter (e.g., `/blog`).
+
+```typescript title="src/api/blog/[[...slug]]/index.ts"
+import type { ApiRequest } from "fahhh";
+
+export async function GET(req: ApiRequest<undefined, { slug?: string[] }>) {
+  return { path: req.params.slug?.join("/") ?? "index" };
 }
 ```
 

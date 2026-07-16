@@ -179,15 +179,51 @@ function joinUrl(baseUrl, path) {
 
 
 function applyParams(routePath, params) {
-  return routePath.replace(/:([A-Za-z0-9_]+)/g, (_, name) => {
-    const value = params && params[name];
+  return routePath
+    .split("/")
+    .filter(Boolean)
+    .flatMap((segment) => {
+      if (!segment.startsWith(":")) return segment;
 
-    if (value === undefined) {
-      throw new Error("[fahhh] Missing route param: " + name);
-    }
+      if (segment.endsWith("*?")) {
+        const name = segment.slice(1, -2);
+        const value = params && params[name];
+        if (value === undefined) return [];
+        return encodeCatchAll(value, name).split("/");
+      }
 
-    return encodeURIComponent(String(value));
-  });
+      if (segment.endsWith("*")) {
+        const name = segment.slice(1, -1);
+        const value = params && params[name];
+
+        if (value === undefined) {
+          throw new Error("[fahhh] Missing route param: " + name);
+        }
+
+        return encodeCatchAll(value, name).split("/");
+      }
+
+      const name = segment.slice(1);
+      const value = params && params[name];
+
+      if (value === undefined) {
+        throw new Error("[fahhh] Missing route param: " + name);
+      }
+
+      return encodeURIComponent(String(value));
+    })
+    .join("/")
+    .replace(/^/, "/");
+}
+
+function encodeCatchAll(value, name) {
+  const parts = Array.isArray(value) ? value : [value];
+
+  if (parts.length === 0) {
+    throw new Error("[fahhh] Missing route param: " + name);
+  }
+
+  return parts.map((part) => encodeURIComponent(String(part))).join("/");
 }
 
 const api = {

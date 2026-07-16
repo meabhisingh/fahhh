@@ -10,10 +10,10 @@ In `fahhh`, handlers are built around standard web `Request` and `Response` obje
 Every exported HTTP method handler (`GET`, `POST`, etc.) receives an `ApiRequest` as its first argument.
 
 ```typescript
-export interface ApiRequest<
-  TBody = undefined,
-  TParams = Record<string, string>,
-> {
+export type RouteParamValue = string | string[] | undefined;
+export type RouteParams = Record<string, RouteParamValue>;
+
+export interface ApiRequest<TBody = undefined, TParams = RouteParams> {
   raw: Request;
   params: TParams;
   headers: Headers;

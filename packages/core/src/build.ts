@@ -48,7 +48,9 @@ export async function build(options: BuildOptions = {}): Promise<void> {
 	const serverOutFile = path.join(serverOutDir, "api.js");
 	const serverEntry = generateServerEntry(manifest, serverOutDir);
 
-	await bundleServer(serverEntry, serverOutFile);
+	await bundleServer(serverEntry, serverOutFile, {
+		root: config.root,
+	});
 }
 
 function assertSafeDistDir(root: string, distDir: string): void {

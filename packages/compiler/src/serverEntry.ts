@@ -75,13 +75,20 @@ function resolveMiddleware(mod: { default?: unknown; middleware?: unknown }) {
 `.trimStart();
 }
 
+export interface BundleServerOptions {
+	root: string;
+	tsconfig?: string;
+}
+
 export async function bundleServer(
 	entrySource: string,
 	outFile: string,
+	options: BundleServerOptions,
 ): Promise<void> {
 	const { build } = await import("esbuild");
 
 	const outDir = path.dirname(outFile);
+	const tsconfig = options.tsconfig ?? path.join(options.root, "tsconfig.json");
 
 	await fs.rm(outDir, { recursive: true, force: true });
 	await fs.mkdir(outDir, { recursive: true });
@@ -98,6 +105,8 @@ export async function bundleServer(
 			target: "node20",
 			outfile: outFile,
 			packages: "external",
+			absWorkingDir: options.root,
+			tsconfig,
 		});
 	} finally {
 		await fs.rm(entryFile, { force: true });

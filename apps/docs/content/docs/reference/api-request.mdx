@@ -2,16 +2,19 @@
 title: ApiRequest
 description: "Shape of the request wrapper passed to handlers"
 ---
+title: ApiRequest
+description: "Shape of the request wrapper passed to handlers"
+---
 
 # `ApiRequest`
 
 The `ApiRequest` is the first argument passed to all of your HTTP method handlers in `src/api`.
 
 ```typescript
-export interface ApiRequest<
-	TBody = undefined,
-	TParams = Record<string, string>,
-> {
+export type RouteParamValue = string | string[] | undefined;
+export type RouteParams = Record<string, RouteParamValue>;
+
+export interface ApiRequest<TBody = undefined, TParams = RouteParams> {
 	raw: Request;
 	params: TParams;
 	headers: Headers;
@@ -35,7 +38,8 @@ export async function GET(req: ApiRequest) {
 ### `params`
 An object containing the typed dynamic path segments. 
 
-For example, in `src/api/users/[id]/index.ts`, `params.id` is available and strictly typed as a string.
+For example, in `src/api/users/[id]/index.ts`, `params.id` is available and strictly typed as a `string`.
+For catch-all routes like `src/api/blog/[...slug]/index.ts`, `params.slug` is strictly typed as a `string[]`.
 
 ### `headers`
 A standard Web API `Headers` object, linked directly to the underlying `Request`.

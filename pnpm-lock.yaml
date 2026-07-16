@@ -177,7 +177,7 @@ importers:
         specifier: ^0.27.7
         version: 0.27.7
       jiti:
-        specifier: ^2.4.2
+        specifier: ^2.7.0
         version: 2.7.0
       vite:
         specifier: '>=5'

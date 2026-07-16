@@ -2,27 +2,25 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { scanApiRoutes } from "@fahhh/compiler";
 import type { Middleware, RouteDefinition, RouteModule } from "@fahhh/runtime";
-import { createJiti } from "jiti";
 
 type MiddlewareExport = Middleware | Middleware[];
+
 type MiddlewareModule = {
-	default?: MiddlewareExport;
+	default?: MiddlewareExport | MiddlewareModule;
 	middleware?: MiddlewareExport;
 };
 
+export type ModuleLoader = (filePath: string) => Promise<unknown>;
+
 export async function loadApiRoutes(
 	apiDir: string,
+	loadModule: ModuleLoader,
 ): Promise<RouteDefinition[]> {
 	const manifest = await scanApiRoutes({ apiDir });
-	const jiti = createJiti(import.meta.url, {
-		moduleCache: false,
-		fsCache: false,
-	});
-
 	const routes: RouteDefinition[] = [];
 
 	for (const scanned of manifest.routes) {
-		const mod = (await jiti.import(scanned.filePath)) as RouteModule;
+		const mod = (await loadModule(scanned.filePath)) as RouteModule;
 		const methods: RouteDefinition["methods"] = {};
 
 		for (const method of scanned.methods) {
@@ -46,7 +44,10 @@ export async function loadApiRoutes(
 	return routes;
 }
 
-export async function loadApiMiddleware(apiDir: string): Promise<Middleware[]> {
+export async function loadApiMiddleware(
+	apiDir: string,
+	loadModule: ModuleLoader,
+): Promise<Middleware[]> {
 	const middlewareFile = path.join(apiDir, "_middleware.ts");
 
 	try {
@@ -55,11 +56,7 @@ export async function loadApiMiddleware(apiDir: string): Promise<Middleware[]> {
 		return [];
 	}
 
-	const jiti = createJiti(import.meta.url, {
-		moduleCache: false,
-		fsCache: false,
-	});
-	const mod = (await jiti.import(middlewareFile)) as MiddlewareModule;
+	const mod = (await loadModule(middlewareFile)) as MiddlewareModule;
 	const exported = resolveMiddlewareExport(mod);
 
 	if (!exported) return [];

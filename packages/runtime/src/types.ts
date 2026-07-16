@@ -7,17 +7,22 @@ export type HttpMethod =
 	| "HEAD"
 	| "OPTIONS";
 
+export type RouteParamValue = string | string[] | undefined;
+export type RouteParams = Record<string, RouteParamValue>;
+
 /**
  * Wraps the real Fetch API Request so the same handler code runs
  * unmodified locally (Node) and on Cloudflare Workers (which already
- * hand you a real Request). TBody exists purely so the compiler can
- * infer a typed client call from `typeof someHandler` -- at runtime
- * `.json()` just forwards to the real Request.
+ * hand you a real Request).
+ *
+ * `TBody` and `TParams` exist purely for compile-time typing:
+ * - `TBody` lets the compiler infer a typed client call from
+ *   `typeof someHandler`.
+ * - `TParams` provides the typed shape of route parameters.
+ *
+ * At runtime, `.json()` simply forwards to the underlying `Request`.
  */
-export interface ApiRequest<
-	TBody = undefined,
-	TParams = Record<string, string>,
-> {
+export interface ApiRequest<TBody = undefined, TParams = RouteParams> {
 	raw: Request;
 	params: TParams;
 	headers: Headers;
@@ -30,7 +35,7 @@ export type HandlerResult<TReturn = unknown> = TReturn | Response;
 export type Handler<
 	TReturn = unknown,
 	TBody = undefined,
-	TParams = Record<string, string>,
+	TParams = RouteParams,
 > = (
 	req: ApiRequest<TBody, TParams>,
 ) => HandlerResult<TReturn> | Promise<HandlerResult<TReturn>>;
@@ -38,7 +43,7 @@ export type Handler<
 export type RouteHandler = Handler<unknown, never, never>;
 
 export type Middleware = (
-	req: ApiRequest<unknown, Record<string, string>>,
+	req: ApiRequest<unknown, RouteParams>,
 	next: () => Promise<Response>,
 ) => Response | Promise<Response>;
 

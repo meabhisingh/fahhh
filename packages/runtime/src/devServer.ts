@@ -15,6 +15,7 @@ import type {
 	HttpMethod,
 	Middleware,
 	RouteDefinition,
+	RouteParams,
 } from "./types";
 
 export interface DevServerOptions {
@@ -46,7 +47,7 @@ async function dispatchApiRequest(
 	const method = fetchReq.method as HttpMethod;
 
 	let pathMatched = false;
-	let matchedParams: Record<string, string> | undefined;
+	let matchedParams: RouteParams | undefined;
 	const allowedMethods = new Set<HttpMethod>();
 
 	for (const { route, compiled: pattern } of compiled) {

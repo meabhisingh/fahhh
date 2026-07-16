@@ -12,9 +12,7 @@ export default function App() {
 	}, []);
 
 	const playFahhh = () => {
-		const audio = new Audio(
-			"https://fahhh.pages.dev/fahhh.mp3",
-		);
+		const audio = new Audio("https://fahhh.pages.dev/fahhh.mp3");
 		audio.play();
 	};
 
@@ -90,13 +88,13 @@ type FahhhButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variants = {
 	primary:
-		"bg-green-600 hover:bg-green-500 text-white shadow-[0_6px_0_rgb(29,128,0)]",
+		"text-black bg-linear-to-b from-green-400 to-green-500 hover:bg-linear-to-b hover:from-green-400/90 hover:to-green-500/90  shadow-[0_6px_0_rgb(29,140,0)]",
 	secondary:
 		"bg-gray-200 hover:bg-gray-100 text-gray-800 shadow-[0_6px_0_rgb(156,163,175)]",
 	danger:
 		"bg-red-600 hover:bg-red-500 text-white shadow-[0_6px_0_rgb(150,0,0)]",
 	outline:
-		"bg-transparent border-2 border-green-600 text-green-600 hover:bg-green-50 shadow-[0_6px_0_rgb(29,128,0)]",
+		"bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white shadow-[0_6px_0_rgb(29,140,0)]",
 };
 
 const FahhhButton = ({
