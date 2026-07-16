@@ -48,7 +48,7 @@ export function cloudflarePages(
 						`[fahhh] API route is outside apiDir: ${route.filePath}`,
 					);
 				}
-				await writeCloudflareFunction(stageFunctions, route);
+				await writeCloudflareFunction(stageFunctions, route, context.root);
 			}
 
 			for (const middlewareFile of manifest.middlewareFiles ?? []) {
@@ -58,7 +58,11 @@ export function cloudflarePages(
 					);
 				}
 
-				await writeCloudflareMiddleware(stageFunctions, middlewareFile);
+				await writeCloudflareMiddleware(
+					stageFunctions,
+					middlewareFile,
+					context.root,
+				);
 			}
 		},
 
@@ -170,12 +174,14 @@ function isManifest(value: unknown): value is ApiManifest {
 
 function isRoutePath(value: unknown): value is string {
 	if (typeof value !== "string") return false;
+
 	const segments = value.split("/").filter(Boolean);
 	if (segments[0] !== "api") return false;
+
 	return segments.every(
 		(segment) =>
 			/^[A-Za-z0-9_-][A-Za-z0-9._-]*$/.test(segment) ||
-			/^:[A-Za-z_][A-Za-z0-9_]*$/.test(segment),
+			/^:[A-Za-z_][A-Za-z0-9_]*(?:\*\??)?$/.test(segment),
 	);
 }
 
@@ -189,6 +195,7 @@ function isPathInside(parent: string, child: string): boolean {
 async function writeCloudflareFunction(
 	functionsDir: string,
 	route: ManifestRoute,
+	root: string,
 ): Promise<void> {
 	const functionFile = toFunctionFile(functionsDir, route.routePath);
 	await fs.mkdir(path.dirname(functionFile), { recursive: true });
@@ -197,6 +204,7 @@ async function writeCloudflareFunction(
 	await bundleFunction(
 		functionFile,
 		generateFunctionSource(route, routeImport, "@fahhh/runtime/worker"),
+		{ root },
 	);
 }
 
@@ -205,9 +213,25 @@ function toFunctionFile(functionsDir: string, routePath: string): string {
 		.replace(/^\/+/, "")
 		.split("/")
 		.filter(Boolean)
-		.map((part) => (part.startsWith(":") ? `[${part.slice(1)}]` : part));
+		.map(toCloudflareRoutePart);
 
 	return `${path.join(functionsDir, ...parts)}.js`;
+}
+
+function toCloudflareRoutePart(part: string): string {
+	if (!part.startsWith(":")) return part;
+
+	const param = part.slice(1);
+
+	if (param.endsWith("*?")) {
+		return `[[${param.slice(0, -2)}]]`;
+	}
+
+	if (param.endsWith("*")) {
+		return `[[${param.slice(0, -1)}]]`;
+	}
+
+	return `[${param}]`;
 }
 
 function generateFunctionSource(
@@ -234,18 +258,15 @@ ${handlers}
 
 export async function onRequest(context: PagesContext): Promise<Response> {
   const method = context.request.method as keyof typeof handlers;
-  const handler = handlers[method];
+  const handler =
+    handlers[method] ??
+    (context.request.method === "HEAD" ? handlers.GET : undefined);
 
   if (!handler) {
     return methodNotAllowed(Object.keys(handlers));
   }
 
-  const params = Object.fromEntries(
-    Object.entries(context.params ?? {}).map(([key, value]) => [
-      key,
-      Array.isArray(value) ? value.join("/") : value,
-    ]),
-  );
+  const params = Object.fromEntries(Object.entries(context.params ?? {}));
   const req = toApiRequest(context.request, params);
   return toResponse(await handler(req as any));
 }
@@ -255,6 +276,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
 async function writeCloudflareMiddleware(
 	functionsDir: string,
 	middlewareFile: string,
+	root: string,
 ): Promise<void> {
 	const functionFile = path.join(functionsDir, "api", "_middleware.js");
 	await fs.mkdir(path.dirname(functionFile), { recursive: true });
@@ -282,31 +304,32 @@ const middlewares = Array.isArray(candidate)
     : [];
 
 export async function onRequest(context: PagesContext): Promise<Response> {
-  const params = Object.fromEntries(
-    Object.entries(context.params ?? {}).map(([key, value]) => [
-      key,
-      Array.isArray(value) ? value.join("/") : value,
-    ]),
-  );
+  const params = Object.fromEntries(Object.entries(context.params ?? {}));
   const request = toApiRequest(context.request, params);
   return composeMiddleware(middlewares, () => context.next())(request);
 }
 `.trimStart();
-	await bundleFunction(functionFile, source);
+	await bundleFunction(functionFile, source, { root });
 }
 
-async function bundleFunction(filePath: string, source: string): Promise<void> {
+async function bundleFunction(
+	filePath: string,
+	source: string,
+	options: { root: string },
+): Promise<void> {
 	const result = await esbuild({
 		stdin: {
 			contents: source,
 			loader: "ts",
-			resolveDir: path.dirname(filePath),
-			sourcefile: path.basename(filePath),
+			resolveDir: options.root,
+			sourcefile: path.relative(options.root, filePath),
 		},
 		bundle: true,
 		format: "esm",
 		platform: "browser",
 		target: "es2022",
+		absWorkingDir: options.root,
+		tsconfig: path.join(options.root, "tsconfig.json"),
 		alias: {
 			fahhh: workerRuntimeFile,
 			"@fahhh/runtime": workerRuntimeFile,
@@ -317,6 +340,7 @@ async function bundleFunction(filePath: string, source: string): Promise<void> {
 	const output = result.outputFiles[0];
 	if (!output)
 		throw new Error(`[fahhh] Failed to bundle function: ${filePath}`);
+
 	await fs.writeFile(filePath, output.contents);
 }
 

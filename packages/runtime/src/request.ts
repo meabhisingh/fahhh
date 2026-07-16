@@ -1,9 +1,9 @@
-import type { ApiRequest } from "./types";
+import type { ApiRequest, RouteParams } from "./types";
 
-export function toApiRequest<
-	TBody = undefined,
-	TParams = Record<string, string>,
->(raw: Request, params: TParams): ApiRequest<TBody, TParams> {
+export function toApiRequest<TBody = undefined, TParams = RouteParams>(
+	raw: Request,
+	params: TParams,
+): ApiRequest<TBody, TParams> {
 	return {
 		raw,
 		params,

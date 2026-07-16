@@ -3,7 +3,7 @@
 	"description": "The official Fahhh framework package",
 	"license": "MIT",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"engines": {
 		"node": ">=18"
 	},
@@ -42,7 +42,7 @@
 	"dependencies": {
 		"@fahhh/runtime": "workspace:*",
 		"esbuild": "^0.27.7",
-		"jiti": "^2.4.2"
+		"jiti": "^2.7.0"
 	},
 	"peerDependencies": {
 		"vite": ">=5"

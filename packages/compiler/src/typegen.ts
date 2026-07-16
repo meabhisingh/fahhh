@@ -3,14 +3,24 @@ import path from "node:path";
 import type { ApiManifest } from "@fahhh/deploy-core";
 
 function toParamsType(routePath: string): string {
-	const names = Array.from(
-		routePath.matchAll(/:([A-Za-z0-9_]+)/g),
-		(match) => match[1],
-	).filter(Boolean);
+	const entries = routePath
+		.split("/")
+		.filter(Boolean)
+		.flatMap((segment) => {
+			if (!segment.startsWith(":")) return [];
 
-	if (names.length === 0) return "{}";
+			if (segment.endsWith("*?")) {
+				return `${JSON.stringify(segment.slice(1, -2))}?: string[]`;
+			}
 
-	return `{ ${names.map((name) => `${JSON.stringify(name)}: string`).join("; ")} }`;
+			if (segment.endsWith("*")) {
+				return `${JSON.stringify(segment.slice(1, -1))}: string[]`;
+			}
+
+			return `${JSON.stringify(segment.slice(1))}: string`;
+		});
+
+	return entries.length === 0 ? "{}" : `{ ${entries.join("; ")} }`;
 }
 
 export async function writeVirtualApiTypes(
