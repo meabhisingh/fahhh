@@ -1,0 +1,89 @@
+---
+title: Errors
+description: "Reference for built-in HTTP exception classes provided by fahhh."
+---
+
+`fahhh` provides a base `HttpException` class and a suite of predefined exception classes for standard 4xx and 5xx HTTP status codes.
+
+You can import these exceptions from `fahhh/errors` and throw them from your route handlers. `fahhh` will automatically catch them and send a properly formatted JSON response to the client.
+
+## `HttpException`
+
+The base error class used for all HTTP exceptions.
+
+```typescript
+export interface HttpExceptionOptions {
+  headers?: HeadersInit;
+  cause?: unknown;
+  body?: unknown;
+}
+
+export class HttpException extends Error {
+  readonly status: number;
+  readonly statusText: string;
+  readonly headers?: HeadersInit;
+  readonly body?: unknown;
+
+  constructor(
+    status: number,
+    message: string,
+    statusText = message,
+    options: HttpExceptionOptions = {},
+  );
+  
+  toResponse(): Response;
+}
+```
+
+## Built-in Exceptions
+
+The following predefined exceptions are available. They all extend `HttpException` and provide the appropriate HTTP status code by default.
+
+### 4xx Client Errors
+
+| Exception Class | Status Code | Description |
+| --- | --- | --- |
+| `BadRequestException` | 400 | Bad Request |
+| `UnauthorizedException` | 401 | Unauthorized |
+| `PaymentRequiredException` | 402 | Payment Required |
+| `ForbiddenException` | 403 | Forbidden |
+| `NotFoundException` | 404 | Not Found |
+| `MethodNotAllowedException` | 405 | Method Not Allowed |
+| `NotAcceptableException` | 406 | Not Acceptable |
+| `RequestTimeoutException` | 408 | Request Timeout |
+| `ConflictException` | 409 | Conflict |
+| `GoneException` | 410 | Gone |
+| `LengthRequiredException` | 411 | Length Required |
+| `PreconditionFailedException` | 412 | Precondition Failed |
+| `PayloadTooLargeException` | 413 | Payload Too Large |
+| `UriTooLongException` | 414 | URI Too Long |
+| `UnsupportedMediaTypeException` | 415 | Unsupported Media Type |
+| `RangeNotSatisfiableException` | 416 | Range Not Satisfiable |
+| `ExpectationFailedException` | 417 | Expectation Failed |
+| `ImATeapotException` | 418 | I'm a teapot |
+| `MisdirectedRequestException` | 421 | Misdirected Request |
+| `UnprocessableEntityException` | 422 | Unprocessable Entity |
+| `LockedException` | 423 | Locked |
+| `FailedDependencyException` | 424 | Failed Dependency |
+| `TooEarlyException` | 425 | Too Early |
+| `UpgradeRequiredException` | 426 | Upgrade Required |
+| `PreconditionRequiredException` | 428 | Precondition Required |
+| `TooManyRequestsException` | 429 | Too Many Requests |
+| `RequestHeaderFieldsTooLargeException` | 431 | Request Header Fields Too Large |
+| `UnavailableForLegalReasonsException` | 451 | Unavailable For Legal Reasons |
+
+### 5xx Server Errors
+
+| Exception Class | Status Code | Description |
+| --- | --- | --- |
+| `InternalServerErrorException` | 500 | Internal Server Error |
+| `NotImplementedException` | 501 | Not Implemented |
+| `BadGatewayException` | 502 | Bad Gateway |
+| `ServiceUnavailableException` | 503 | Service Unavailable |
+| `GatewayTimeoutException` | 504 | Gateway Timeout |
+| `HttpVersionNotSupportedException` | 505 | HTTP Version Not Supported |
+| `VariantAlsoNegotiatesException` | 506 | Variant Also Negotiates |
+| `InsufficientStorageException` | 507 | Insufficient Storage |
+| `LoopDetectedException` | 508 | Loop Detected |
+| `NotExtendedException` | 510 | Not Extended |
+| `NetworkAuthenticationRequiredException` | 511 | Network Authentication Required |

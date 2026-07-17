@@ -18,8 +18,15 @@
 		},
 		"./worker": {
 			"types": "./dist/worker.d.ts",
-			"import": "./dist/worker.js",
-			"default": "./dist/worker.js"
+			"import": "./dist/worker.js"
+		},
+		"./errors": {
+			"types": "./dist/errors.d.ts",
+			"import": "./dist/errors.js"
+		},
+		"./utils": {
+			"types": "./dist/utils.d.ts",
+			"import": "./dist/utils.js"
 		}
 	},
 	"scripts": {

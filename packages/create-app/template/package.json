@@ -15,7 +15,7 @@
 	"dependencies": {
 		"@tailwindcss/vite": "^4.3.2",
 		"clsx": "^2.1.1",
-		"fahhh": "^0.2.0",
+		"fahhh": "^0.3.0",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"tailwindcss": "^4.3.2"

@@ -1,5 +1,6 @@
 import type { Server, ServerResponse } from "node:http";
 import { createServer as createNodeServer } from "node:http";
+import { HttpException } from "./errors";
 import { composeMiddleware } from "./middleware";
 import {
 	RequestBodyTooLargeError,
@@ -92,6 +93,11 @@ async function handleRequestError(
 	nodeRes: ServerResponse,
 	error: unknown,
 ): Promise<void> {
+	if (error instanceof HttpException) {
+		await sendFetchResponse(nodeRes, error.toResponse());
+		return;
+	}
+
 	if (error instanceof RequestBodyTooLargeError) {
 		await sendFetchResponse(
 			nodeRes,

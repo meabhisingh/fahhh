@@ -16,6 +16,14 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./errors": {
+			"types": "./dist/errors.d.ts",
+			"import": "./dist/errors.js"
+		},
+		"./utils": {
+			"types": "./dist/utils.d.ts",
+			"import": "./dist/utils.js"
 		}
 	},
 	"repository": {

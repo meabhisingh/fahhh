@@ -29,6 +29,23 @@ This wrapper ensures that:
 3. `req.query` exposes parsed URL search parameters via `URLSearchParams`.
 4. You still have access to the raw underlying `Request` if you need it.
 
+### Request Utilities
+
+`fahhh` provides several utility functions to help you extract common information from the request. You can import them directly from `fahhh/utils`:
+
+```typescript
+import { headers, cookies, bearer, basicAuth } from "fahhh/utils";
+
+export async function GET(req: ApiRequest) {
+  const allHeaders = headers(req);
+  const userCookies = cookies(req);
+  const token = bearer(req);
+  const credentials = basicAuth(req);
+
+  // ...
+}
+```
+
 ## Returning Data
 
 `fahhh` allows handlers to return raw, JSON-serializable data directly. You do not have to manually construct a `Response` object for basic endpoints.
@@ -65,3 +82,26 @@ export async function POST(req) {
 ```
 
 Whenever a native `Response` is returned, `fahhh` will pass it through untouched to the client.
+
+## Error Handling
+
+Instead of manually constructing error `Response` objects, you can throw or return one of the many built-in `HttpException` classes provided by `fahhh`. The framework will automatically catch these and convert them into standard JSON error responses.
+
+```typescript
+import { NotFoundException, BadRequestException } from "fahhh/errors";
+
+export async function GET(req) {
+  if (!req.query.has("id")) {
+    throw new BadRequestException("Missing ID parameter");
+  }
+
+  const user = await db.getUser(req.query.get("id"));
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
+  return user;
+}
+```
+
+`fahhh` includes exceptions for all common 4xx and 5xx HTTP status codes, such as `UnauthorizedException`, `ForbiddenException`, `ConflictException`, and `InternalServerErrorException`.

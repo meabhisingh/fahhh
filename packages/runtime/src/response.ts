@@ -1,3 +1,5 @@
+import { HttpException } from "./errors";
+
 export function json(data: unknown, init: ResponseInit = {}): Response {
 	const headers = new Headers(init.headers);
 	if (!headers.has("Content-Type")) {
@@ -49,6 +51,9 @@ export function methodNotAllowed(allowedMethods: string[] = []): Response {
  */
 export function toResponse(result: unknown): Response {
 	if (result instanceof Response) return result;
+
+	if (result instanceof HttpException) return result.toResponse();
+
 	if (result === undefined) {
 		return new Response(null, {
 			status: 204,
