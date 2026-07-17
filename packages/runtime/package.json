@@ -3,7 +3,7 @@
 	"description": "This is runtime of Fahhh",
 	"license": "MIT",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"types": "dist/index.d.ts",
 	"files": [
 		"dist"

@@ -56,7 +56,15 @@ declare module "virtual:api" {
         : undefined
       : undefined;
 
-  type ClientOptions = { headers?: HeadersInit; signal?: AbortSignal };
+  type QueryPrimitive = string | number | boolean | null | undefined;
+  type QueryValue = QueryPrimitive | QueryPrimitive[];
+  type QueryInput = Record<string, QueryValue>;
+
+  type ClientOptions = {
+    headers?: HeadersInit;
+    signal?: AbortSignal;
+    query?: QueryInput;
+  };
 
   type ClientInput<TBody, TParams> =
     keyof TParams extends never

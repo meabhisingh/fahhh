@@ -3,7 +3,7 @@
 	"description": "The official Fahhh framework package",
 	"license": "MIT",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"engines": {
 		"node": ">=18"
 	},

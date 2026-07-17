@@ -25,6 +25,7 @@ export type RouteParams = Record<string, RouteParamValue>;
 export interface ApiRequest<TBody = undefined, TParams = RouteParams> {
 	raw: Request;
 	params: TParams;
+	query: URLSearchParams;
 	headers: Headers;
 	json(): Promise<TBody>;
 }

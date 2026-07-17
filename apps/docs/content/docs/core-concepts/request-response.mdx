@@ -16,6 +16,7 @@ export type RouteParams = Record<string, RouteParamValue>;
 export interface ApiRequest<TBody = undefined, TParams = RouteParams> {
   raw: Request;
   params: TParams;
+  query: URLSearchParams;
   headers: Headers;
   json(): Promise<TBody>;
 }
@@ -25,7 +26,8 @@ This wrapper ensures that:
 
 1. `req.json()` returns the correctly typed body.
 2. `req.params` contains the typed dynamic segments of your route.
-3. You still have access to the raw underlying `Request` if you need it.
+3. `req.query` exposes parsed URL search parameters via `URLSearchParams`.
+4. You still have access to the raw underlying `Request` if you need it.
 
 ## Returning Data
 

@@ -2,7 +2,7 @@
 	"name": "@fahhh/compiler",
 	"private": true,
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"types": "dist/index.d.ts",
 	"exports": {
 		".": {

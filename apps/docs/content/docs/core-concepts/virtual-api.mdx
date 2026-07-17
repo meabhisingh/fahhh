@@ -48,7 +48,7 @@ export default function App() {
 
   useEffect(() => {
     // Both the route "/api/users/[id]" and the "id" param are autocompleted!
-    api["/api/users/[id]"].GET({ params: { id: "123" } }).then(setUser);
+    api["/api/users/[id]"].GET({ params: { id: "123" }, query: { active: true } }).then(setUser);
   }, []);
 
   return <div>{user?.name}</div>;
@@ -58,5 +58,6 @@ export default function App() {
 ### Type Flow
 
 1. **Parameters (`TParams`)**: The compiler parses `[id]` and ensures `params.id` is required in the client call.
-2. **Request Body (`TBody`)**: If your API handler expects an `ApiRequest<{ name: string }>`, the client forces you to pass a `body` with `{ name: string }`.
-3. **Response (`TReturn`)**: The awaited result on the frontend matches precisely what your `GET` or `POST` handler returns.
+2. **Query Parameters (`query`)**: You can pass `query` parameters which will be appended to the URL as a query string.
+3. **Request Body (`TBody`)**: If your API handler expects an `ApiRequest<{ name: string }>`, the client forces you to pass a `body` with `{ name: string }`.
+4. **Response (`TReturn`)**: The awaited result on the frontend matches precisely what your `GET` or `POST` handler returns.

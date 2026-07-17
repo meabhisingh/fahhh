@@ -2,7 +2,7 @@
 	"name": "@fahhh/vite-plugin",
 	"private": true,
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.3.0",
 	"types": "dist/index.d.ts",
 	"exports": "./src/index.ts",
 	"scripts": {

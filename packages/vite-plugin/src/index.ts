@@ -147,7 +147,10 @@ function generateVirtualApiModule(
 function createClient(routePath, method) {
   return async function callApi(input) {
     const options = input || {};
-    const url = joinUrl(API_BASE_URL, applyParams(routePath, options.params));
+    const url = withQuery(
+      joinUrl(API_BASE_URL, applyParams(routePath, options.params)),
+      options.query,
+    );
     const headers = new Headers(options.headers);
 
     const init = { method, headers, signal: options.signal };
@@ -175,6 +178,31 @@ function createClient(routePath, method) {
 function joinUrl(baseUrl, path) {
   if (!baseUrl) return path;
   return baseUrl.replace(/\\/+$/, "") + "/" + path.replace(/^\\/+/, "");
+}
+
+function withQuery(url, query) {
+  if (!query) return url;
+
+  const base =
+    typeof window === "undefined" ? "http://fahhh.local" : window.location.origin;
+  const parsed = new URL(url, base);
+
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined || value === null) continue;
+
+    const values = Array.isArray(value) ? value : [value];
+
+    for (const item of values) {
+      if (item === undefined || item === null) continue;
+      parsed.searchParams.append(key, String(item));
+    }
+  }
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return parsed.toString();
+  }
+
+  return parsed.pathname + parsed.search + parsed.hash;
 }
 
 
